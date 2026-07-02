@@ -24,6 +24,7 @@ import HeroStat from "./HeroStat";
 import StreakBadge from "./StreakBadge";
 import ProfileCalculator from "./ProfileCalculator";
 import SundayBanner from "./SundayBanner";
+import DailyMacroBars from "./DailyMacroBars";
 import WeeklyMacroBars from "./WeeklyMacroBars";
 import DaySelector from "./DaySelector";
 import DayCard from "./DayCard";
@@ -223,6 +224,8 @@ export default function Dashboard() {
         </div>
 
         <SundayBanner />
+
+        <DailyMacroBars consumed={todayConsumed} target={dailyTarget} />
 
         <WeeklyMacroBars consumed={weeklyConsumed} weeklyTarget={weeklyTarget} insight={insight} />
 
