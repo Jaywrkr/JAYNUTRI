@@ -15,9 +15,11 @@ const desayunoBatido: Recipe = {
     { name: "Plátano (guineo)", qty: "1 unidad", section: "Verduras y frutas", estCost: 0.15 },
     { name: "Leche deslactosada o bebida vegetal", qty: "250 ml", section: "Lácteos y huevos", estCost: 0.35 },
     { name: "Maní natural", qty: "10 g", section: "Grasas y condimentos", estCost: 0.1 },
+    { name: "Creatina monohidratada (sin sabor)", qty: "5 g (1 cdta)", section: "Otros", estCost: 0.27 },
   ],
   steps: [
     "Licuar la avena, el plátano, la leche y la proteína hasta homogeneizar.",
+    "Agregar la creatina al final y batir unos segundos más — no aporta sabor ni calorías extra.",
     "Servir y espolvorear el maní picado.",
   ],
 };
@@ -36,10 +38,11 @@ const desayunoTortilla: Recipe = {
     { name: "Espinaca fresca", qty: "1 puñado", section: "Verduras y frutas", estCost: 0.3 },
     { name: "Pan integral o tostadas de arroz", qty: "2 unidades", section: "Granos y legumbres", estCost: 0.4 },
     { name: "Proteína en polvo (whey)", qty: "1/2 scoop (15 g) en agua aparte", section: "Otros", estCost: 0.45 },
+    { name: "Creatina monohidratada (sin sabor)", qty: "5 g (1 cdta) en el vaso de proteína", section: "Otros", estCost: 0.27 },
   ],
   steps: [
     "Batir las claras con el huevo entero, saltear con la espinaca en sartén antiadherente.",
-    "Acompañar con el pan integral y un vaso pequeño de proteína disuelta en agua.",
+    "Acompañar con el pan integral y un vaso pequeño de proteína + creatina disueltas en agua.",
   ],
 };
 
@@ -56,9 +59,10 @@ const desayunoYogur: Recipe = {
     { name: "Proteína en polvo (whey)", qty: "1/2 scoop (15 g)", section: "Otros", estCost: 0.45 },
     { name: "Avena en hojuelas", qty: "30 g", section: "Granos y legumbres", estCost: 0.15 },
     { name: "Maní natural", qty: "15 g", section: "Grasas y condimentos", estCost: 0.15 },
+    { name: "Creatina monohidratada (sin sabor)", qty: "5 g (1 cdta)", section: "Otros", estCost: 0.27 },
   ],
   steps: [
-    "Mezclar el yogur con la proteína en polvo hasta integrar.",
+    "Mezclar el yogur con la proteína en polvo y la creatina hasta integrar.",
     "Agregar la avena y el maní encima. Servir frío.",
   ],
 };

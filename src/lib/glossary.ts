@@ -35,6 +35,11 @@ export const GLOSSARY: GlossaryTerm[] = [
     short: "La resta que hace perder grasa",
     full: "Comer menos calorías de las que gastas (TDEE). Un déficit moderado (10-20%) permite perder grasa sin sacrificar tanto músculo ni rendimiento en el entrenamiento.",
   },
+  {
+    term: "Creatina",
+    short: "Suplemento para fuerza y potencia",
+    full: "5 g diarios de creatina monohidratada (sin sabor, se disuelve en cualquier líquido) mejoran la fuerza y la recuperación en kettlebell y Muay Thai. No aporta calorías relevantes y se toma cualquier hora del día, todos los días — incluida en el desayuno de esta app.",
+  },
 ];
 
 export function findTerm(term: string): GlossaryTerm | undefined {

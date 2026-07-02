@@ -80,14 +80,41 @@ export default function RecipeCard({ recipe, eaten, onToggle, badge }: Props) {
       </button>
 
       {showSteps && (
-        <ol
-          className="mt-2 list-decimal list-inside space-y-1 text-xs"
-          style={{ color: "var(--text-secondary)" }}
-        >
-          {recipe.steps.map((s, i) => (
-            <li key={i}>{s}</li>
-          ))}
-        </ol>
+        <div className="mt-3 space-y-3">
+          <div>
+            <p className="text-xs font-semibold mb-1" style={{ color: "var(--foreground)" }}>
+              Ingredientes{" "}
+              <span className="font-normal" style={{ color: "var(--text-muted)" }}>
+                {recipe.servings > 1
+                  ? `· receta completa, rinde ${recipe.servings} porciones`
+                  : "· 1 porción"}
+              </span>
+            </p>
+            <ul className="space-y-0.5 text-xs" style={{ color: "var(--text-secondary)" }}>
+              {recipe.ingredients.map((ing) => (
+                <li key={ing.name} className="flex justify-between gap-3">
+                  <span>{ing.name}</span>
+                  <span className="shrink-0 font-medium" style={{ color: "var(--foreground)" }}>
+                    {ing.qty}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <p className="text-xs font-semibold mb-1" style={{ color: "var(--foreground)" }}>
+              Preparación
+            </p>
+            <ol
+              className="list-decimal list-inside space-y-1 text-xs"
+              style={{ color: "var(--text-secondary)" }}
+            >
+              {recipe.steps.map((s, i) => (
+                <li key={i}>{s}</li>
+              ))}
+            </ol>
+          </div>
+        </div>
       )}
     </div>
   );
