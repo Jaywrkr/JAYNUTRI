@@ -85,7 +85,7 @@ export default function RecipeCard({
             {override && (
               <span
                 className="text-[10px] uppercase tracking-wide rounded-full px-2 py-0.5 font-medium"
-                style={{ background: "color-mix(in oklab, var(--brand-orange) 16%, transparent)", color: "var(--brand-orange)" }}
+                style={{ background: "color-mix(in oklab, var(--brand-accent) 16%, transparent)", color: "var(--brand-accent)" }}
               >
                 editado
               </span>
@@ -121,7 +121,7 @@ export default function RecipeCard({
           <button
             onClick={startEdit}
             className="text-xs font-medium hover:underline"
-            style={{ color: "var(--brand-orange)" }}
+            style={{ color: "var(--brand-accent)" }}
           >
             Editar macros
           </button>

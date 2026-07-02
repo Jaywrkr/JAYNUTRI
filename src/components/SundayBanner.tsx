@@ -80,22 +80,26 @@ export default function SundayBanner() {
         {permission !== "unsupported" && permission !== "granted" && (
           <button
             onClick={enableReminder}
-            className="rounded-full bg-white/20 backdrop-blur text-white text-xs font-medium px-3.5 py-1.5 border border-white/30 hover:bg-white/30 transition-colors"
+            className="rounded-full text-xs font-medium px-3.5 py-1.5 border transition-colors"
+            style={{ background: "rgba(13,13,13,0.1)", borderColor: "rgba(13,13,13,0.2)", color: "var(--brand-black)" }}
           >
             Activar notificación en el navegador
           </button>
         )}
         {permission === "granted" && (
-          <span className="text-xs opacity-90">Notificaciones activadas ✓</span>
+          <span className="text-xs opacity-80">Notificaciones activadas ✓</span>
         )}
       </div>
 
-      <div className="mt-4 rounded-2xl bg-white/12 backdrop-blur p-4 relative border border-white/20">
+      <div
+        className="mt-4 rounded-2xl p-4 relative border"
+        style={{ background: "rgba(13,13,13,0.08)", borderColor: "rgba(13,13,13,0.15)" }}
+      >
         <div className="flex items-center justify-between mb-2">
-          <p className="text-xs font-semibold uppercase tracking-wide opacity-90">
+          <p className="text-xs font-semibold uppercase tracking-wide opacity-80">
             🧊 Checklist de batch cooking y congelado
           </p>
-          <span className="text-xs opacity-80 tabular-nums">
+          <span className="text-xs opacity-70 tabular-nums">
             {doneCount}/{SUNDAY_PREP_CHECKLIST.length}
           </span>
         </div>
@@ -107,8 +111,12 @@ export default function SundayBanner() {
                 className="flex items-start gap-2 text-left w-full"
               >
                 <span
-                  className="mt-0.5 shrink-0 grid place-items-center h-4 w-4 rounded-full border border-white/60 text-[10px]"
-                  style={{ background: checked[i] ? "var(--brand-orange)" : "transparent", borderColor: checked[i] ? "var(--brand-orange)" : "rgba(255,255,255,0.6)", color: checked[i] ? "white" : "transparent" }}
+                  className="mt-0.5 shrink-0 grid place-items-center h-4 w-4 rounded-full border text-[10px]"
+                  style={{
+                    background: checked[i] ? "var(--brand-black)" : "transparent",
+                    borderColor: checked[i] ? "var(--brand-black)" : "rgba(13,13,13,0.4)",
+                    color: checked[i] ? "white" : "transparent",
+                  }}
                 >
                   ✓
                 </span>

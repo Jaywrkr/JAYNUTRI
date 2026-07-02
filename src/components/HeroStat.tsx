@@ -29,7 +29,20 @@ function useCountUp(value: number, duration = 1) {
 const WIDTH = 320;
 const CENTER = WIDTH / 2;
 const BASELINE = 128;
+// Radios de los arcos decorativos; PATH_R es el arco que el punto recorre
+// de verdad, como un sol que sale por la izquierda, sube al mediodía, y se
+// pone por la derecha a medida que se completa el objetivo del día.
 const ARCS = [40, 62, 84, 106, 128, 150];
+const PATH_R = 128;
+const PATH_RY = PATH_R * 0.72;
+
+function pointOnArc(t: number) {
+  const angle = Math.PI * (1 - t); // 180° (izquierda) -> 0° (derecha)
+  return {
+    x: CENTER + PATH_R * Math.cos(angle),
+    y: BASELINE - PATH_RY * Math.sin(angle),
+  };
+}
 
 export default function HeroStat({ label, consumed, target, dayLabel }: Props) {
   // Objetivo obligatorio: hay que llegar al 100%, no un techo que no se debe cruzar.
@@ -38,7 +51,7 @@ export default function HeroStat({ label, consumed, target, dayLabel }: Props) {
   const done = pct >= 1;
   const displayValue = useCountUp(done ? consumed.kcal : remaining);
 
-  const dotX = 24 + Math.min(1, pct) * (WIDTH - 48);
+  const dot = pointOnArc(Math.min(1, pct));
 
   return (
     <div className="brand-card rounded-[32px] relative overflow-hidden min-h-[280px] flex flex-col justify-between">
@@ -52,7 +65,7 @@ export default function HeroStat({ label, consumed, target, dayLabel }: Props) {
         {done && (
           <span
             className="text-[11px] font-semibold uppercase tracking-wide rounded-full px-2.5 py-1"
-            style={{ background: "var(--brand-orange)", color: "white" }}
+            style={{ background: "var(--brand-accent)", color: "white" }}
           >
             ✓ cumplido
           </span>
@@ -70,9 +83,9 @@ export default function HeroStat({ label, consumed, target, dayLabel }: Props) {
             key={r}
             d={`M ${CENTER - r} ${BASELINE} A ${r} ${r * 0.72} 0 0 1 ${CENTER + r} ${BASELINE}`}
             fill="none"
-            stroke="rgba(255,255,255,0.9)"
-            strokeWidth="1"
-            opacity={0.08 + i * 0.05}
+            stroke={r === PATH_R ? "var(--brand-accent)" : "rgba(255,255,255,0.9)"}
+            strokeWidth={r === PATH_R ? 1.5 : 1}
+            opacity={r === PATH_R ? 0.5 : 0.08 + i * 0.05}
           />
         ))}
         <line
@@ -84,12 +97,11 @@ export default function HeroStat({ label, consumed, target, dayLabel }: Props) {
           strokeWidth="1"
         />
         <motion.circle
-          cy={BASELINE}
           r="9"
-          fill="var(--brand-orange)"
+          fill="var(--brand-accent)"
           initial={false}
-          animate={{ cx: dotX }}
-          transition={{ type: "spring", stiffness: 120, damping: 18 }}
+          animate={{ cx: dot.x, cy: dot.y }}
+          transition={{ type: "spring", stiffness: 90, damping: 16 }}
         />
       </svg>
 

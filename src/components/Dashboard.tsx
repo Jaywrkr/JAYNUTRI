@@ -186,7 +186,7 @@ export default function Dashboard() {
       },
       {
         icon: "🍽️",
-        iconBg: "color-mix(in oklab, var(--brand-orange) 20%, transparent)",
+        iconBg: "color-mix(in oklab, var(--brand-accent) 20%, transparent)",
         label: "Almuerzo",
         sublabel: lunchSub,
         kcal: lunchKcal,

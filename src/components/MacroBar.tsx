@@ -55,7 +55,7 @@ export default function MacroBar({ label, current, target, unit, color, tip }: P
           {Math.round(current)} / {Math.round(target)} {unit}
           <span
             className="ml-1.5 font-semibold"
-            style={{ color: done ? "var(--brand-orange)" : "var(--foreground)" }}
+            style={{ color: done ? "var(--brand-accent)" : "var(--foreground)" }}
           >
             {done ? "✓ " : ""}
             {realPct}%

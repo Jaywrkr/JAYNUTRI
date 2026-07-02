@@ -29,7 +29,7 @@ export default function TabBar({ active, onChange }: Props) {
             onClick={() => onChange(item.id)}
             aria-current={isActive ? "true" : undefined}
             className="flex flex-col items-center justify-center gap-0.5 h-12 w-14 sm:w-20 rounded-full text-base transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2"
-            style={{ background: isActive ? "var(--brand-orange)" : "transparent" }}
+            style={{ background: isActive ? "var(--brand-accent)" : "transparent" }}
           >
             <span className="leading-none" aria-hidden>
               {item.icon}
