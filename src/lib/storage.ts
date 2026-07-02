@@ -14,15 +14,19 @@ const KEYS = {
 
 export type WeekLogs = Record<DayKey, DayLog>;
 
+function emptyDayLog(): DayLog {
+  return { breakfastEaten: false, lunchEaten: false, dinnerEaten: false, extras: [] };
+}
+
 export function emptyLogs(): WeekLogs {
   return {
-    lunes: { breakfastEaten: false, lunchEaten: false, dinnerEaten: false },
-    martes: { breakfastEaten: false, lunchEaten: false, dinnerEaten: false },
-    miercoles: { breakfastEaten: false, lunchEaten: false, dinnerEaten: false },
-    jueves: { breakfastEaten: false, lunchEaten: false, dinnerEaten: false },
-    viernes: { breakfastEaten: false, lunchEaten: false, dinnerEaten: false },
-    sabado: { breakfastEaten: false, lunchEaten: false, dinnerEaten: false },
-    domingo: { breakfastEaten: false, lunchEaten: false, dinnerEaten: false },
+    lunes: emptyDayLog(),
+    martes: emptyDayLog(),
+    miercoles: emptyDayLog(),
+    jueves: emptyDayLog(),
+    viernes: emptyDayLog(),
+    sabado: emptyDayLog(),
+    domingo: emptyDayLog(),
   };
 }
 
@@ -31,7 +35,12 @@ export function loadLogs(): WeekLogs {
   try {
     const raw = window.localStorage.getItem(KEYS.logs);
     if (!raw) return emptyLogs();
-    return { ...emptyLogs(), ...JSON.parse(raw) };
+    const stored = JSON.parse(raw) as Partial<WeekLogs>;
+    const merged = emptyLogs();
+    for (const day of Object.keys(merged) as DayKey[]) {
+      merged[day] = { ...merged[day], ...stored[day], extras: stored[day]?.extras ?? [] };
+    }
+    return merged;
   } catch {
     return emptyLogs();
   }

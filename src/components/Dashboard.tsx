@@ -6,7 +6,7 @@ import { DAY_ORDER, WEEK_PLAN } from "@/lib/mealPlan";
 import { calcTargets, sumMacros } from "@/lib/nutrition";
 import { buildWeeklyInsight } from "@/lib/insights";
 import { computeStreak, toISODate } from "@/lib/streak";
-import { DayKey, Macros, MomLunchLog } from "@/lib/types";
+import { DayKey, ExtraEntry, Macros, MomLunchLog } from "@/lib/types";
 import {
   CompletedDates,
   loadBudget,
@@ -122,6 +122,7 @@ export default function Dashboard() {
         else if (log.momLunch) all.push(log.momLunch.macros);
       }
       if (log.dinnerEaten) all.push(plan.dinner.macros);
+      all.push(...log.extras.map((e) => e.macros));
       return sumMacros(all);
     },
     [logs]
@@ -169,6 +170,26 @@ export default function Dashboard() {
     setLogs((prev) => ({
       ...prev,
       [day]: { ...prev[day], momLunch: undefined, lunchEaten: false },
+    }));
+  };
+
+  const addExtra = (day: DayKey, entry: ExtraEntry) => {
+    setLogs((prev) => ({
+      ...prev,
+      [day]: { ...prev[day], extras: [...prev[day].extras, entry] },
+    }));
+    showToast(`${entry.name} agregado ✓ (${entry.macros.kcal} kcal)`, () =>
+      setLogs((prev) => ({
+        ...prev,
+        [day]: { ...prev[day], extras: prev[day].extras.filter((e) => e.id !== entry.id) },
+      }))
+    );
+  };
+
+  const removeExtra = (day: DayKey, id: string) => {
+    setLogs((prev) => ({
+      ...prev,
+      [day]: { ...prev[day], extras: prev[day].extras.filter((e) => e.id !== id) },
     }));
   };
 
@@ -230,6 +251,8 @@ export default function Dashboard() {
                 onToggleMeal={(meal) => toggleMeal(activeDay, meal)}
                 onSaveMomLunch={(log) => saveMomLunch(activeDay, log)}
                 onClearMomLunch={() => clearMomLunch(activeDay)}
+                onAddExtra={(entry) => addExtra(activeDay, entry)}
+                onRemoveExtra={(id) => removeExtra(activeDay, id)}
               />
             </motion.div>
           </AnimatePresence>

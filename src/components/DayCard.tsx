@@ -1,8 +1,9 @@
 "use client";
 
-import { DayPlan, DayLog, Macros, MomLunchLog } from "@/lib/types";
+import { DayPlan, DayLog, ExtraEntry, Macros, MomLunchLog } from "@/lib/types";
 import RecipeCard from "./RecipeCard";
 import MomLunchLogger from "./MomLunchLogger";
+import SnackLogger from "./SnackLogger";
 
 type Props = {
   day: DayPlan;
@@ -11,6 +12,8 @@ type Props = {
   onToggleMeal: (meal: "breakfastEaten" | "lunchEaten" | "dinnerEaten") => void;
   onSaveMomLunch: (log: MomLunchLog) => void;
   onClearMomLunch: () => void;
+  onAddExtra: (entry: ExtraEntry) => void;
+  onRemoveExtra: (id: string) => void;
 };
 
 export default function DayCard({
@@ -20,6 +23,8 @@ export default function DayCard({
   onToggleMeal,
   onSaveMomLunch,
   onClearMomLunch,
+  onAddExtra,
+  onRemoveExtra,
 }: Props) {
   const consumedSoFar: Macros = { kcal: 0, protein: 0, carbs: 0, fat: 0 };
   if (log.breakfastEaten) {
@@ -37,6 +42,12 @@ export default function DayCard({
       consumedSoFar.carbs += lunchMacros.carbs;
       consumedSoFar.fat += lunchMacros.fat;
     }
+  }
+  for (const extra of log.extras) {
+    consumedSoFar.kcal += extra.macros.kcal;
+    consumedSoFar.protein += extra.macros.protein;
+    consumedSoFar.carbs += extra.macros.carbs;
+    consumedSoFar.fat += extra.macros.fat;
   }
 
   const remaining: Macros = {
@@ -117,7 +128,14 @@ export default function DayCard({
         />
       </div>
 
-      {!log.dinnerEaten && (log.breakfastEaten || log.lunchEaten) && (
+      <div>
+        <p className="text-xs font-semibold mb-1.5" style={{ color: "var(--text-secondary)" }}>
+          Extras
+        </p>
+        <SnackLogger extras={log.extras} onAdd={onAddExtra} onRemove={onRemoveExtra} />
+      </div>
+
+      {!log.dinnerEaten && (log.breakfastEaten || log.lunchEaten || log.extras.length > 0) && (
         <div
           className="rounded-2xl px-3.5 py-2.5 text-xs"
           style={{ background: "var(--surface-muted)", color: "var(--text-secondary)" }}

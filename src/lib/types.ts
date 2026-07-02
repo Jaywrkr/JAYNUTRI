@@ -64,11 +64,19 @@ export type MomLunchLog = {
   macros: Macros;
 };
 
+export type ExtraEntry = {
+  id: string;
+  name: string;
+  qtyLabel: string;
+  macros: Macros;
+};
+
 export type DayLog = {
   breakfastEaten: boolean;
   lunchEaten: boolean;
   dinnerEaten: boolean;
   momLunch?: MomLunchLog;
+  extras: ExtraEntry[];
 };
 
 export type Profile = {
