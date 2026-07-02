@@ -16,81 +16,89 @@ export default function ProfileCalculator({ profile, onChange }: Props) {
   const update = (patch: Partial<Profile>) => onChange({ ...profile, ...patch });
 
   return (
-    <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5">
-      <div className="flex items-center justify-between">
+    <div className="glass-card rounded-3xl p-5 sm:p-6">
+      <div className="flex items-center justify-between gap-3">
         <div>
           <h2 className="text-lg font-semibold">Perfil y objetivo calórico</h2>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">
+          <p className="text-sm mt-0.5" style={{ color: "var(--text-secondary)" }}>
             36 años · 160 lb · 175 cm · kettlebell + Muay Thai + yoga (5x/semana)
           </p>
         </div>
         <button
           onClick={() => setOpen((o) => !o)}
-          className="text-sm font-medium text-emerald-600 dark:text-emerald-400 hover:underline"
+          className="shrink-0 text-sm font-medium rounded-full px-3.5 py-1.5 transition-opacity hover:opacity-80"
+          style={{ background: "var(--brand-gradient)", color: "white" }}
         >
           {open ? "Ocultar" : "Editar datos"}
         </button>
       </div>
 
       {open && (
-        <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
-          <label className="flex flex-col gap-1">
-            Peso (kg)
+        <div className="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
+          <label className="flex flex-col gap-1.5">
+            <span style={{ color: "var(--text-secondary)" }}>Peso (kg)</span>
             <input
               type="number"
               value={profile.weightKg}
               onChange={(e) => update({ weightKg: Number(e.target.value) })}
-              className="rounded-lg border border-zinc-300 dark:border-zinc-700 bg-transparent px-2 py-1"
+              className="rounded-xl border px-3 py-1.5 bg-transparent"
+              style={{ borderColor: "var(--border-hairline)" }}
             />
           </label>
-          <label className="flex flex-col gap-1">
-            Altura (cm)
+          <label className="flex flex-col gap-1.5">
+            <span style={{ color: "var(--text-secondary)" }}>Altura (cm)</span>
             <input
               type="number"
               value={profile.heightCm}
               onChange={(e) => update({ heightCm: Number(e.target.value) })}
-              className="rounded-lg border border-zinc-300 dark:border-zinc-700 bg-transparent px-2 py-1"
+              className="rounded-xl border px-3 py-1.5 bg-transparent"
+              style={{ borderColor: "var(--border-hairline)" }}
             />
           </label>
-          <label className="flex flex-col gap-1">
-            Edad
+          <label className="flex flex-col gap-1.5">
+            <span style={{ color: "var(--text-secondary)" }}>Edad</span>
             <input
               type="number"
               value={profile.age}
               onChange={(e) => update({ age: Number(e.target.value) })}
-              className="rounded-lg border border-zinc-300 dark:border-zinc-700 bg-transparent px-2 py-1"
+              className="rounded-xl border px-3 py-1.5 bg-transparent"
+              style={{ borderColor: "var(--border-hairline)" }}
             />
           </label>
-          <label className="flex flex-col gap-1">
-            Entrenos/semana
+          <label className="flex flex-col gap-1.5">
+            <span style={{ color: "var(--text-secondary)" }}>Entrenos/semana</span>
             <input
               type="number"
               value={profile.trainingDaysPerWeek}
               onChange={(e) => update({ trainingDaysPerWeek: Number(e.target.value) })}
-              className="rounded-lg border border-zinc-300 dark:border-zinc-700 bg-transparent px-2 py-1"
+              className="rounded-xl border px-3 py-1.5 bg-transparent"
+              style={{ borderColor: "var(--border-hairline)" }}
             />
           </label>
-          <label className="flex flex-col gap-1 col-span-2 sm:col-span-4">
-            Déficit calórico ({profile.deficitPct}%)
+          <label className="flex flex-col gap-1.5 col-span-2 sm:col-span-4">
+            <span style={{ color: "var(--text-secondary)" }}>
+              Déficit calórico ({profile.deficitPct}%)
+            </span>
             <input
               type="range"
               min={5}
               max={25}
               value={profile.deficitPct}
               onChange={(e) => update({ deficitPct: Number(e.target.value) })}
+              className="accent-[var(--macro-protein)]"
             />
           </label>
         </div>
       )}
 
-      <div className="mt-4 grid grid-cols-2 sm:grid-cols-5 gap-3">
+      <div className="mt-5 grid grid-cols-2 sm:grid-cols-5 gap-3">
         <Stat label="BMR" value={`${bmr} kcal`} />
         <Stat label="TDEE" value={`${tdee} kcal`} />
-        <Stat label="Objetivo diario" value={`${macros.kcal} kcal`} highlight />
-        <Stat label="Proteína" value={`${macros.protein} g`} highlight />
-        <Stat label="Carbs / Grasa" value={`${macros.carbs} g / ${macros.fat} g`} />
+        <Stat label="Objetivo diario" value={`${macros.kcal} kcal`} accent="kcal" />
+        <Stat label="Proteína" value={`${macros.protein} g`} accent="protein" />
+        <Stat label="Carbs / Grasa" value={`${macros.carbs} g / ${macros.fat} g`} accent="carbs" />
       </div>
-      <p className="mt-3 text-xs text-zinc-500 dark:text-zinc-400">
+      <p className="mt-4 text-xs" style={{ color: "var(--text-muted)" }}>
         Cálculo con fórmula Mifflin-St Jeor + factor de actividad, y déficit moderado para
         perder grasa abdominal preservando masa muscular (proteína alta, ~2 g/kg).
       </p>
@@ -98,17 +106,28 @@ export default function ProfileCalculator({ profile, onChange }: Props) {
   );
 }
 
-function Stat({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
+function Stat({
+  label,
+  value,
+  accent,
+}: {
+  label: string;
+  value: string;
+  accent?: "kcal" | "protein" | "carbs";
+}) {
   return (
     <div
-      className={`rounded-xl px-3 py-2 ${
-        highlight
-          ? "bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300"
-          : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300"
-      }`}
+      className="relative overflow-hidden rounded-2xl px-3.5 py-3"
+      style={{
+        background: accent
+          ? `linear-gradient(140deg, color-mix(in oklab, var(--macro-${accent}) 16%, var(--surface-muted)), var(--surface-muted))`
+          : "var(--surface-muted)",
+      }}
     >
-      <div className="text-xs">{label}</div>
-      <div className="font-semibold">{value}</div>
+      <div className="text-xs" style={{ color: "var(--text-secondary)" }}>
+        {label}
+      </div>
+      <div className="font-semibold text-[15px] mt-0.5">{value}</div>
     </div>
   );
 }

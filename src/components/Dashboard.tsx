@@ -107,11 +107,24 @@ export default function Dashboard() {
 
   return (
     <div className="mx-auto max-w-4xl w-full px-4 sm:px-6 py-8 space-y-6">
-      <header>
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-          🥗 JayNutri — Plan semanal de Jay
-        </h1>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+      <header className="pt-2">
+        <div className="flex items-center gap-2">
+          <span
+            className="grid place-items-center h-11 w-11 rounded-2xl text-xl shrink-0"
+            style={{ background: "var(--brand-gradient)" }}
+          >
+            🥗
+          </span>
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight gradient-text">
+              JayNutri
+            </h1>
+            <p className="text-sm -mt-0.5" style={{ color: "var(--text-secondary)" }}>
+              Plan semanal de Jay
+            </p>
+          </div>
+        </div>
+        <p className="text-xs sm:text-sm mt-3" style={{ color: "var(--text-muted)" }}>
           Cuenca, Ecuador · compra única los domingos · batch cooking · sin melón, sin azúcar,
           sin procesados
         </p>
@@ -124,19 +137,30 @@ export default function Dashboard() {
       <WeeklyMacroBars consumed={weeklyConsumed} weeklyTarget={weeklyTarget} />
 
       <section>
-        <h2 className="text-lg font-semibold mb-3">📅 Plan de comidas de la semana</h2>
+        <div className="flex items-center gap-2 mb-3">
+          <span className="grid place-items-center h-8 w-8 rounded-xl text-base bg-[color-mix(in_oklab,var(--macro-carbs)_18%,transparent)]">
+            📅
+          </span>
+          <h2 className="text-lg font-semibold">Plan de comidas de la semana</h2>
+        </div>
         <div className="flex gap-2 overflow-x-auto pb-2 mb-4">
           {DAY_ORDER.map((d) => {
             const plan = WEEK_PLAN.find((p) => p.day === d)!;
+            const active = activeDay === d;
             return (
               <button
                 key={d}
                 onClick={() => setActiveDay(d)}
-                className={`shrink-0 rounded-full px-3 py-1.5 text-sm border ${
-                  activeDay === d
-                    ? "bg-zinc-900 text-white border-zinc-900 dark:bg-white dark:text-zinc-900"
-                    : "border-zinc-300 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300"
-                }`}
+                className="shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-all"
+                style={
+                  active
+                    ? { background: "var(--brand-gradient)", color: "white" }
+                    : {
+                        border: "1px solid var(--border-hairline)",
+                        color: "var(--text-secondary)",
+                        background: "var(--surface)",
+                      }
+                }
               >
                 {plan.label.split(" ")[0]}
               </button>
@@ -156,7 +180,7 @@ export default function Dashboard() {
 
       <ShoppingCart budget={budget} onBudgetChange={setBudget} />
 
-      <footer className="text-xs text-center text-zinc-400 dark:text-zinc-600 pt-4">
+      <footer className="text-xs text-center pt-4 pb-2" style={{ color: "var(--text-muted)" }}>
         Hecho para Jay · datos guardados solo en este navegador (localStorage)
       </footer>
     </div>

@@ -49,18 +49,23 @@ export default function DayCard({
   const dinnerFit = day.dinner.macros.kcal - remaining.kcal;
 
   return (
-    <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 space-y-3">
+    <div className="glass-card rounded-3xl p-5 space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-base font-semibold">{day.label}</h3>
         {day.lucaJoins && (
-          <span className="text-[10px] uppercase tracking-wide bg-pink-100 text-pink-700 dark:bg-pink-950 dark:text-pink-300 rounded-full px-2 py-0.5">
+          <span
+            className="text-[10px] uppercase tracking-wide rounded-full px-2.5 py-1 font-medium text-white"
+            style={{ background: "linear-gradient(90deg, var(--macro-carbs), var(--macro-fat))" }}
+          >
             👦 con Luca
           </span>
         )}
       </div>
 
       <div>
-        <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 mb-1">Desayuno</p>
+        <p className="text-xs font-semibold mb-1.5" style={{ color: "var(--text-secondary)" }}>
+          Desayuno
+        </p>
         <RecipeCard
           recipe={day.breakfast}
           eaten={log.breakfastEaten}
@@ -69,7 +74,9 @@ export default function DayCard({
       </div>
 
       <div>
-        <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 mb-1">Almuerzo</p>
+        <p className="text-xs font-semibold mb-1.5" style={{ color: "var(--text-secondary)" }}>
+          Almuerzo
+        </p>
         {day.lunch.type === "recipe" ? (
           <RecipeCard
             recipe={day.lunch.recipe}
@@ -89,7 +96,8 @@ export default function DayCard({
             {!log.lunchEaten && log.momLunch && (
               <button
                 onClick={() => onToggleMeal("lunchEaten")}
-                className="text-xs text-emerald-600 dark:text-emerald-400 hover:underline"
+                className="text-xs font-medium hover:underline"
+                style={{ color: "var(--macro-protein)" }}
               >
                 Marcar almuerzo como comido
               </button>
@@ -99,7 +107,7 @@ export default function DayCard({
       </div>
 
       <div>
-        <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 mb-1">
+        <p className="text-xs font-semibold mb-1.5" style={{ color: "var(--text-secondary)" }}>
           Cena {day.lucaJoins && "(porción extra para Luca)"}
         </p>
         <RecipeCard
@@ -110,9 +118,14 @@ export default function DayCard({
       </div>
 
       {!log.dinnerEaten && (log.breakfastEaten || log.lunchEaten) && (
-        <div className="rounded-lg bg-zinc-100 dark:bg-zinc-800 px-3 py-2 text-xs text-zinc-600 dark:text-zinc-300">
-          Te quedan <strong>{remaining.kcal} kcal</strong> y{" "}
-          <strong>{remaining.protein} g proteína</strong> para la cena.{" "}
+        <div
+          className="rounded-2xl px-3.5 py-2.5 text-xs"
+          style={{ background: "var(--surface-muted)", color: "var(--text-secondary)" }}
+        >
+          Te quedan{" "}
+          <strong style={{ color: "var(--foreground)" }}>{remaining.kcal} kcal</strong> y{" "}
+          <strong style={{ color: "var(--foreground)" }}>{remaining.protein} g proteína</strong>{" "}
+          para la cena.{" "}
           {dinnerFit > 150
             ? "Esta cena se pasa un poco del restante — sirve una porción algo más chica."
             : dinnerFit < -150
