@@ -1,0 +1,45 @@
+"use client";
+
+import { motion } from "motion/react";
+import { DAY_ORDER, WEEK_PLAN } from "@/lib/mealPlan";
+import { DayKey } from "@/lib/types";
+
+type Props = {
+  activeDay: DayKey;
+  onChange: (d: DayKey) => void;
+};
+
+export default function DaySelector({ activeDay, onChange }: Props) {
+  return (
+    <div className="flex gap-1.5 overflow-x-auto pb-1 mb-4 -mx-1 px-1">
+      {DAY_ORDER.map((d) => {
+        const plan = WEEK_PLAN.find((p) => p.day === d)!;
+        const active = activeDay === d;
+        return (
+          <button
+            key={d}
+            onClick={() => onChange(d)}
+            className="relative shrink-0 rounded-full px-4 py-2 text-sm font-medium"
+            style={{ color: active ? "white" : "var(--text-secondary)" }}
+          >
+            {active && (
+              <motion.span
+                layoutId="day-pill"
+                className="absolute inset-0 rounded-full -z-10"
+                style={{ background: "var(--brand-gradient)" }}
+                transition={{ type: "spring", stiffness: 420, damping: 34 }}
+              />
+            )}
+            {!active && (
+              <span
+                className="absolute inset-0 rounded-full -z-10"
+                style={{ border: "1px solid var(--border-hairline)", background: "var(--surface)" }}
+              />
+            )}
+            {plan.label.split(" ")[0]}
+          </button>
+        );
+      })}
+    </div>
+  );
+}

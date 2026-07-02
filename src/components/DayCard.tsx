@@ -49,7 +49,7 @@ export default function DayCard({
   const dinnerFit = day.dinner.macros.kcal - remaining.kcal;
 
   return (
-    <div className="glass-card rounded-3xl p-5 space-y-4">
+    <div className="glass-card rounded-[28px] p-5 space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-base font-semibold">{day.label}</h3>
         {day.lucaJoins && (

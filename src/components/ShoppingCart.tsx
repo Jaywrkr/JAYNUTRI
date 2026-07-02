@@ -14,7 +14,7 @@ export default function ShoppingCart({ budget, onBudgetChange }: Props) {
   const overBudget = total > budget;
 
   return (
-    <div className="glass-card rounded-3xl p-5 sm:p-6">
+    <div className="glass-card rounded-[28px] p-5 sm:p-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-2">
           <span className="grid place-items-center h-8 w-8 rounded-xl text-base bg-[color-mix(in_oklab,var(--macro-fat)_18%,transparent)]">

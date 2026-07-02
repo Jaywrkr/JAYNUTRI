@@ -16,7 +16,7 @@ export default function ProfileCalculator({ profile, onChange }: Props) {
   const update = (patch: Partial<Profile>) => onChange({ ...profile, ...patch });
 
   return (
-    <div className="glass-card rounded-3xl p-5 sm:p-6">
+    <div className="glass-card rounded-[28px] p-5 sm:p-6">
       <div className="flex items-center justify-between gap-3">
         <div>
           <h2 className="text-lg font-semibold">Perfil y objetivo calórico</h2>

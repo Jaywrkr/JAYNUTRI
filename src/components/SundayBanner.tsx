@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { WEEK_PLAN } from "@/lib/mealPlan";
+import { SUNDAY_PREP_CHECKLIST, WEEK_PLAN } from "@/lib/mealPlan";
 import { buildShoppingList } from "@/lib/shoppingList";
+
+const CHECKLIST_KEY = "jaynutri:sunday-prep:v1";
 
 export default function SundayBanner() {
   const [isSunday, setIsSunday] = useState(false);
@@ -10,19 +12,35 @@ export default function SundayBanner() {
   const [permission, setPermission] = useState<NotificationPermission | "unsupported">(
     "default"
   );
+  const [checked, setChecked] = useState<Record<number, boolean>>({});
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time hydration from Date/Notification, not derivable during SSR
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time hydration from Date/Notification/localStorage, not derivable during SSR
     setIsSunday(new Date().getDay() === 0);
     if (typeof window !== "undefined" && "Notification" in window) {
       setPermission(Notification.permission);
     } else {
       setPermission("unsupported");
     }
+    try {
+      const raw = window.localStorage.getItem(CHECKLIST_KEY);
+      if (raw) setChecked(JSON.parse(raw));
+    } catch {
+      /* ignore */
+    }
   }, []);
+
+  const toggleItem = (i: number) => {
+    setChecked((prev) => {
+      const next = { ...prev, [i]: !prev[i] };
+      window.localStorage.setItem(CHECKLIST_KEY, JSON.stringify(next));
+      return next;
+    });
+  };
 
   const visible = isSunday || forcedOpen;
   const { total } = buildShoppingList();
+  const doneCount = SUNDAY_PREP_CHECKLIST.filter((_, i) => checked[i]).length;
 
   const enableReminder = async () => {
     if (!("Notification" in window)) return;
@@ -30,7 +48,7 @@ export default function SundayBanner() {
     setPermission(result);
     if (result === "granted") {
       new Notification("JayNutri 🛒", {
-        body: "Recordatorio activado: cada domingo verás aquí tu lista de compras y el plan de la semana entrante.",
+        body: "Recordatorio activado: cada domingo verás aquí tu lista de compras, tu checklist de batch cooking, y el plan de la semana entrante.",
       });
     }
   };
@@ -49,7 +67,7 @@ export default function SundayBanner() {
 
   return (
     <div
-      className="rounded-3xl p-5 sm:p-6 text-white relative overflow-hidden"
+      className="rounded-[28px] p-5 sm:p-6 text-white relative overflow-hidden"
       style={{
         background:
           "linear-gradient(120deg, var(--macro-protein) 0%, var(--macro-kcal) 55%, var(--macro-carbs) 100%)",
@@ -61,8 +79,8 @@ export default function SundayBanner() {
             🔔 Recordatorio dominical{isSunday ? "" : " (vista previa)"}
           </h2>
           <p className="text-sm opacity-90 mt-1">
-            Hoy toca la compra semanal — lista generada + resumen del plan de la semana
-            entrante, estimado ${total.toFixed(2)}.
+            Hoy toca compra + batch cooking + congelar fruta — lista generada, estimado $
+            {total.toFixed(2)}, y el plan de la semana entrante.
           </p>
         </div>
         {permission !== "unsupported" && permission !== "granted" && (
@@ -76,6 +94,35 @@ export default function SundayBanner() {
         {permission === "granted" && (
           <span className="text-xs opacity-90">Notificaciones activadas ✓</span>
         )}
+      </div>
+
+      <div className="mt-4 rounded-2xl bg-white/12 backdrop-blur p-4 relative border border-white/20">
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-xs font-semibold uppercase tracking-wide opacity-90">
+            🧊 Checklist de batch cooking y congelado
+          </p>
+          <span className="text-xs opacity-80 tabular-nums">
+            {doneCount}/{SUNDAY_PREP_CHECKLIST.length}
+          </span>
+        </div>
+        <ul className="space-y-1.5 text-sm">
+          {SUNDAY_PREP_CHECKLIST.map((task, i) => (
+            <li key={i}>
+              <button
+                onClick={() => toggleItem(i)}
+                className="flex items-start gap-2 text-left w-full"
+              >
+                <span
+                  className="mt-0.5 shrink-0 grid place-items-center h-4 w-4 rounded-full border border-white/60 text-[10px]"
+                  style={{ background: checked[i] ? "white" : "transparent", color: checked[i] ? "var(--macro-protein)" : "transparent" }}
+                >
+                  ✓
+                </span>
+                <span className={checked[i] ? "line-through opacity-60" : ""}>{task}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
       </div>
 
       <ul className="mt-4 grid sm:grid-cols-2 gap-x-6 gap-y-1.5 text-sm relative">

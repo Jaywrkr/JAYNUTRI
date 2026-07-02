@@ -10,7 +10,7 @@ type Props = {
 
 export default function WeeklyMacroBars({ consumed, weeklyTarget }: Props) {
   return (
-    <div className="glass-card rounded-3xl p-5 sm:p-6 space-y-5">
+    <div className="glass-card rounded-[28px] p-5 sm:p-6 space-y-5">
       <div className="flex items-center gap-2">
         <span className="grid place-items-center h-8 w-8 rounded-xl text-base bg-[color-mix(in_oklab,var(--macro-protein)_18%,transparent)]">
           📊

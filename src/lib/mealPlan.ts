@@ -303,6 +303,15 @@ export const WEEK_PLAN: DayPlan[] = [
   },
 ];
 
+export const SUNDAY_PREP_CHECKLIST: string[] = [
+  "Hacer la compra con la lista del carrito inteligente",
+  "Cocinar todas las cenas de batch cooking de la semana de una vez (pollo al horno, lentejas, fréjol) y porcionar en tarrinas: 3-4 días en refrigerador, el resto al congelador",
+  "Cocinar las bases de granos (quinoa, arroz integral) para toda la semana y refrigerar en un solo recipiente grande",
+  "Congelar fruta para los batidos: pelar y cortar en rodajas los plátanos (guineo) de todo el batch de desayunos y congelar en fundas individuales — batido más rápido en las mañanas y la fruta no se madura de más",
+  "Lavar y cortar verduras de hoja (espinaca, brócoli) y guardarlas listas para saltear o asar",
+  "Dejar porciones extra de cena etiquetadas para Luca (martes y viernes)",
+];
+
 export const LUCA_PORTION_FACTOR = 0.55; // porción infantil aproximada
 
 export const DAY_ORDER: DayKey[] = [

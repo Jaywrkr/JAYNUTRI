@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { DAY_ORDER, WEEK_PLAN } from "@/lib/mealPlan";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
+import { WEEK_PLAN } from "@/lib/mealPlan";
 import { calcTargets, sumMacros } from "@/lib/nutrition";
 import { DayKey, Macros, MomLunchLog } from "@/lib/types";
 import {
@@ -13,11 +14,16 @@ import {
   saveProfile,
   WeekLogs,
 } from "@/lib/storage";
+import NavBar from "./NavBar";
+import HeroStat from "./HeroStat";
 import ProfileCalculator from "./ProfileCalculator";
 import SundayBanner from "./SundayBanner";
 import WeeklyMacroBars from "./WeeklyMacroBars";
+import DaySelector from "./DaySelector";
 import DayCard from "./DayCard";
 import ShoppingCart from "./ShoppingCart";
+
+const DOW_MAP: DayKey[] = ["domingo", "lunes", "martes", "miercoles", "jueves", "viernes", "sabado"];
 
 export default function Dashboard() {
   const [ready, setReady] = useState(false);
@@ -25,23 +31,21 @@ export default function Dashboard() {
   const [logs, setLogs] = useState<WeekLogs>(loadLogs());
   const [budget, setBudget] = useState(loadBudget());
   const [activeDay, setActiveDay] = useState<DayKey>("lunes");
+  const [todayKey, setTodayKey] = useState<DayKey>("lunes");
+  const [todayLabel, setTodayLabel] = useState("");
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time hydration from localStorage/Date, not derivable during SSR
     setProfile(loadProfile());
     setLogs(loadLogs());
     setBudget(loadBudget());
-    const todayIdx = new Date().getDay(); // 0=domingo
-    const map: DayKey[] = [
-      "domingo",
-      "lunes",
-      "martes",
-      "miercoles",
-      "jueves",
-      "viernes",
-      "sabado",
-    ];
-    setActiveDay(map[todayIdx]);
+    const now = new Date();
+    const key = DOW_MAP[now.getDay()];
+    setActiveDay(key);
+    setTodayKey(key);
+    setTodayLabel(
+      now.toLocaleDateString("es-EC", { weekday: "long", day: "numeric", month: "long" })
+    );
     setReady(true);
   }, []);
 
@@ -68,19 +72,28 @@ export default function Dashboard() {
     [dailyTarget]
   );
 
-  const weeklyConsumed = useMemo(() => {
-    const all: Macros[] = [];
-    for (const day of WEEK_PLAN) {
-      const log = logs[day.day];
-      if (log.breakfastEaten) all.push(day.breakfast.macros);
+  const macrosForDay = useCallback(
+    (day: DayKey): Macros => {
+      const plan = WEEK_PLAN.find((p) => p.day === day)!;
+      const log = logs[day];
+      const all: Macros[] = [];
+      if (log.breakfastEaten) all.push(plan.breakfast.macros);
       if (log.lunchEaten) {
-        if (day.lunch.type === "recipe") all.push(day.lunch.recipe.macros);
+        if (plan.lunch.type === "recipe") all.push(plan.lunch.recipe.macros);
         else if (log.momLunch) all.push(log.momLunch.macros);
       }
-      if (log.dinnerEaten) all.push(day.dinner.macros);
-    }
-    return sumMacros(all);
-  }, [logs]);
+      if (log.dinnerEaten) all.push(plan.dinner.macros);
+      return sumMacros(all);
+    },
+    [logs]
+  );
+
+  const weeklyConsumed = useMemo(
+    () => sumMacros(WEEK_PLAN.map((d) => macrosForDay(d.day))),
+    [macrosForDay]
+  );
+
+  const todayConsumed = useMemo(() => macrosForDay(todayKey), [macrosForDay, todayKey]);
 
   const toggleMeal = (
     day: DayKey,
@@ -106,83 +119,69 @@ export default function Dashboard() {
   const currentDayPlan = WEEK_PLAN.find((d) => d.day === activeDay)!;
 
   return (
-    <div className="mx-auto max-w-4xl w-full px-4 sm:px-6 py-8 space-y-6">
-      <header className="pt-2">
-        <div className="flex items-center gap-2">
-          <span
-            className="grid place-items-center h-11 w-11 rounded-2xl text-xl shrink-0"
-            style={{ background: "var(--brand-gradient)" }}
-          >
-            🥗
-          </span>
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight gradient-text">
-              JayNutri
-            </h1>
-            <p className="text-sm -mt-0.5" style={{ color: "var(--text-secondary)" }}>
-              Plan semanal de Jay
-            </p>
+    <>
+      <NavBar todayLabel={todayLabel} />
+      <div className="mx-auto max-w-5xl w-full px-4 sm:px-6 py-8 space-y-6">
+        <header className="pt-1">
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight gradient-text">
+            Plan semanal de Jay
+          </h1>
+          <p className="text-xs sm:text-sm mt-2" style={{ color: "var(--text-muted)" }}>
+            Cuenca, Ecuador · compra única los domingos · batch cooking · sin melón, sin azúcar,
+            sin procesados
+          </p>
+        </header>
+
+        <div className="grid lg:grid-cols-[1.1fr_1.4fr] gap-4 items-stretch">
+          <HeroStat
+            label="Hoy"
+            consumed={todayConsumed}
+            target={dailyTarget}
+            dayLabel={WEEK_PLAN.find((d) => d.day === todayKey)?.label.split(" ")[0] ?? ""}
+          />
+          <ProfileCalculator profile={profile} onChange={setProfile} />
+        </div>
+
+        <SundayBanner />
+
+        <WeeklyMacroBars consumed={weeklyConsumed} weeklyTarget={weeklyTarget} />
+
+        <section>
+          <div className="flex items-center gap-2 mb-3">
+            <span className="grid place-items-center h-8 w-8 rounded-xl text-base bg-[color-mix(in_oklab,var(--macro-carbs)_18%,transparent)]">
+              📅
+            </span>
+            <h2 className="text-lg font-semibold">Plan de comidas de la semana</h2>
           </div>
-        </div>
-        <p className="text-xs sm:text-sm mt-3" style={{ color: "var(--text-muted)" }}>
-          Cuenca, Ecuador · compra única los domingos · batch cooking · sin melón, sin azúcar,
-          sin procesados
-        </p>
-      </header>
 
-      <ProfileCalculator profile={profile} onChange={setProfile} />
+          <DaySelector activeDay={activeDay} onChange={setActiveDay} />
 
-      <SundayBanner />
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeDay}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <DayCard
+                day={currentDayPlan}
+                log={logs[activeDay]}
+                dailyTarget={dailyTarget}
+                onToggleMeal={(meal) => toggleMeal(activeDay, meal)}
+                onSaveMomLunch={(log) => saveMomLunch(activeDay, log)}
+                onClearMomLunch={() => clearMomLunch(activeDay)}
+              />
+            </motion.div>
+          </AnimatePresence>
+        </section>
 
-      <WeeklyMacroBars consumed={weeklyConsumed} weeklyTarget={weeklyTarget} />
+        <ShoppingCart budget={budget} onBudgetChange={setBudget} />
 
-      <section>
-        <div className="flex items-center gap-2 mb-3">
-          <span className="grid place-items-center h-8 w-8 rounded-xl text-base bg-[color-mix(in_oklab,var(--macro-carbs)_18%,transparent)]">
-            📅
-          </span>
-          <h2 className="text-lg font-semibold">Plan de comidas de la semana</h2>
-        </div>
-        <div className="flex gap-2 overflow-x-auto pb-2 mb-4">
-          {DAY_ORDER.map((d) => {
-            const plan = WEEK_PLAN.find((p) => p.day === d)!;
-            const active = activeDay === d;
-            return (
-              <button
-                key={d}
-                onClick={() => setActiveDay(d)}
-                className="shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-all"
-                style={
-                  active
-                    ? { background: "var(--brand-gradient)", color: "white" }
-                    : {
-                        border: "1px solid var(--border-hairline)",
-                        color: "var(--text-secondary)",
-                        background: "var(--surface)",
-                      }
-                }
-              >
-                {plan.label.split(" ")[0]}
-              </button>
-            );
-          })}
-        </div>
-
-        <DayCard
-          day={currentDayPlan}
-          log={logs[activeDay]}
-          dailyTarget={dailyTarget}
-          onToggleMeal={(meal) => toggleMeal(activeDay, meal)}
-          onSaveMomLunch={(log) => saveMomLunch(activeDay, log)}
-          onClearMomLunch={() => clearMomLunch(activeDay)}
-        />
-      </section>
-
-      <ShoppingCart budget={budget} onBudgetChange={setBudget} />
-
-      <footer className="text-xs text-center pt-4 pb-2" style={{ color: "var(--text-muted)" }}>
-        Hecho para Jay · datos guardados solo en este navegador (localStorage)
-      </footer>
-    </div>
+        <footer className="text-xs text-center pt-4 pb-2" style={{ color: "var(--text-muted)" }}>
+          Hecho para Jay · datos guardados solo en este navegador (localStorage)
+        </footer>
+      </div>
+    </>
   );
 }
