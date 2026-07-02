@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { FOOD_DB, FoodItem, searchFoods } from "@/lib/foods";
+import { FoodItem, searchFoods } from "@/lib/foods";
 import { scaleMacros } from "@/lib/nutrition";
 import { ExtraEntry } from "@/lib/types";
 
@@ -124,8 +124,8 @@ export default function SnackLogger({ extras, onAdd, onRemove }: Props) {
 
       {!selected && query && results.length === 0 && (
         <p className="mt-1.5 text-xs" style={{ color: "var(--text-muted)" }}>
-          No encontré &quot;{query}&quot; en la base — probá con otro nombre (ej:{" "}
-          {FOOD_DB[0].name.toLowerCase()}, {FOOD_DB[12].name.toLowerCase()}).
+          No encontré &quot;{query}&quot; en la base — probá con otro nombre (ej: manzana, huevo,
+          pollo, lentejas).
         </p>
       )}
 

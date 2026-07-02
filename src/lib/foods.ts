@@ -43,14 +43,75 @@ export const FOOD_DB: FoodItem[] = [
   { id: "proteina-polvo", name: "Proteína en polvo (whey)", aliases: ["scoop de proteina"], unit: "1 scoop (30 g)", macros: { kcal: 120, protein: 24, carbs: 3, fat: 2 } },
   { id: "leche", name: "Leche deslactosada", aliases: [], unit: "1 vaso (250 ml)", macros: { kcal: 122, protein: 8, carbs: 12, fat: 5 } },
   { id: "cafe", name: "Café negro (sin azúcar)", aliases: [], unit: "1 taza", macros: { kcal: 2, protein: 0, carbs: 0, fat: 0 } },
+
+  // Verduras
+  { id: "brocoli", name: "Brócoli cocido", aliases: [], unit: "1 taza", macros: { kcal: 55, protein: 4, carbs: 11, fat: 1 } },
+  { id: "espinaca", name: "Espinaca cocida", aliases: [], unit: "1 taza", macros: { kcal: 41, protein: 5, carbs: 7, fat: 1 } },
+  { id: "zanahoria", name: "Zanahoria", aliases: [], unit: "1 unidad", macros: { kcal: 25, protein: 1, carbs: 6, fat: 0 } },
+  { id: "tomate", name: "Tomate riñón", aliases: ["jitomate"], unit: "1 unidad", macros: { kcal: 22, protein: 1, carbs: 5, fat: 0 } },
+  { id: "pepino", name: "Pepino", aliases: [], unit: "1 unidad", macros: { kcal: 45, protein: 2, carbs: 11, fat: 0 } },
+  { id: "lechuga", name: "Lechuga", aliases: [], unit: "1 taza", macros: { kcal: 5, protein: 1, carbs: 1, fat: 0 } },
+  { id: "pimiento", name: "Pimiento", aliases: ["pimenton"], unit: "1 unidad", macros: { kcal: 24, protein: 1, carbs: 6, fat: 0 } },
+  { id: "cebolla", name: "Cebolla", aliases: [], unit: "1/2 unidad", macros: { kcal: 22, protein: 1, carbs: 5, fat: 0 } },
+  { id: "coliflor", name: "Coliflor cocida", aliases: [], unit: "1 taza", macros: { kcal: 29, protein: 2, carbs: 5, fat: 0 } },
+  { id: "champinones", name: "Champiñones", aliases: ["hongos"], unit: "1 taza", macros: { kcal: 15, protein: 2, carbs: 2, fat: 0 } },
+
+  // Legumbres cocidas
+  { id: "lentejas", name: "Lentejas cocidas", aliases: [], unit: "1 taza", macros: { kcal: 230, protein: 18, carbs: 40, fat: 1 } },
+  { id: "frejol", name: "Fréjol cocido", aliases: ["frijol", "poroto"], unit: "1 taza", macros: { kcal: 245, protein: 15, carbs: 45, fat: 1 } },
+  { id: "garbanzos", name: "Garbanzos cocidos", aliases: [], unit: "1 taza", macros: { kcal: 269, protein: 15, carbs: 45, fat: 4 } },
+  { id: "habas", name: "Habas cocidas", aliases: [], unit: "1 taza", macros: { kcal: 187, protein: 13, carbs: 33, fat: 1 } },
+
+  // Proteínas
+  { id: "res", name: "Carne de res magra cocida", aliases: ["carne de res"], unit: "100 g", macros: { kcal: 205, protein: 27, carbs: 0, fat: 10 } },
+  { id: "cerdo", name: "Lomo de cerdo cocido", aliases: ["chancho"], unit: "100 g", macros: { kcal: 180, protein: 26, carbs: 0, fat: 7 } },
+  { id: "pescado", name: "Pescado blanco (tilapia/corvina)", aliases: ["tilapia", "corvina"], unit: "100 g", macros: { kcal: 128, protein: 26, carbs: 0, fat: 3 } },
+  { id: "camaron", name: "Camarón cocido", aliases: [], unit: "100 g", macros: { kcal: 99, protein: 24, carbs: 0, fat: 0 } },
+  { id: "pavo", name: "Pavo cocido", aliases: [], unit: "100 g", macros: { kcal: 135, protein: 25, carbs: 0, fat: 3 } },
+  { id: "tofu", name: "Tofu", aliases: [], unit: "100 g", macros: { kcal: 76, protein: 8, carbs: 2, fat: 5 } },
+
+  // Lácteos extra
+  { id: "leche-entera", name: "Leche entera", aliases: [], unit: "1 vaso (250 ml)", macros: { kcal: 149, protein: 8, carbs: 12, fat: 8 } },
+  { id: "requeson", name: "Requesón (cottage cheese)", aliases: [], unit: "1 taza", macros: { kcal: 206, protein: 28, carbs: 6, fat: 9 } },
+
+  // Frutos secos y semillas
+  { id: "nueces", name: "Nueces", aliases: [], unit: "1 puñado (28 g)", macros: { kcal: 185, protein: 4, carbs: 4, fat: 18 } },
+  { id: "chia", name: "Semillas de chía", aliases: [], unit: "1 cda (15 g)", macros: { kcal: 69, protein: 2, carbs: 6, fat: 4 } },
+  { id: "girasol", name: "Semillas de girasol", aliases: [], unit: "1 puñado (28 g)", macros: { kcal: 165, protein: 6, carbs: 6, fat: 14 } },
+  { id: "coco", name: "Coco rallado", aliases: [], unit: "30 g", macros: { kcal: 100, protein: 1, carbs: 4, fat: 9 } },
+
+  // Granos y tubérculos
+  { id: "yuca", name: "Yuca cocida", aliases: ["mandioca"], unit: "1 taza", macros: { kcal: 191, protein: 2, carbs: 45, fat: 0 } },
+  { id: "choclo", name: "Choclo (maíz) cocido", aliases: ["maiz", "elote"], unit: "1 unidad", macros: { kcal: 123, protein: 5, carbs: 27, fat: 2 } },
+  { id: "melloco", name: "Melloco cocido", aliases: [], unit: "1 taza", macros: { kcal: 90, protein: 2, carbs: 20, fat: 0 } },
+
+  // Grasas
+  { id: "aceite-oliva", name: "Aceite de oliva", aliases: [], unit: "1 cda", macros: { kcal: 119, protein: 0, carbs: 0, fat: 14 } },
+
+  // Frutas adicionales
+  { id: "kiwi", name: "Kiwi", aliases: [], unit: "1 unidad", macros: { kcal: 42, protein: 1, carbs: 10, fat: 0 } },
+  { id: "durazno", name: "Durazno", aliases: [], unit: "1 unidad", macros: { kcal: 59, protein: 1, carbs: 14, fat: 0 } },
+  { id: "maracuya", name: "Maracuyá", aliases: [], unit: "1 unidad", macros: { kcal: 17, protein: 0, carbs: 4, fat: 0 } },
+  { id: "taxo", name: "Taxo", aliases: [], unit: "1 unidad", macros: { kcal: 12, protein: 0, carbs: 3, fat: 0 } },
+  { id: "mora", name: "Mora", aliases: [], unit: "1 taza", macros: { kcal: 62, protein: 2, carbs: 14, fat: 1 } },
+  { id: "guanabana", name: "Guanábana", aliases: [], unit: "1 taza picada", macros: { kcal: 148, protein: 2, carbs: 38, fat: 1 } },
+  { id: "granadilla", name: "Granadilla", aliases: [], unit: "1 unidad", macros: { kcal: 20, protein: 1, carbs: 5, fat: 0 } },
 ];
 
+function normalize(s: string): string {
+  return s
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+}
+
 export function searchFoods(query: string, limit = 6): FoodItem[] {
-  const q = query.trim().toLowerCase();
+  const q = normalize(query);
   if (!q) return [];
 
   const scored = FOOD_DB.map((food) => {
-    const haystacks = [food.name.toLowerCase(), ...food.aliases.map((a) => a.toLowerCase())];
+    const haystacks = [normalize(food.name), ...food.aliases.map(normalize)];
     let score = -1;
     for (const h of haystacks) {
       if (h === q) score = Math.max(score, 100);
