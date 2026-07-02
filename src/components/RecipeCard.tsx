@@ -1,17 +1,47 @@
 "use client";
 
 import { useState } from "react";
-import { Recipe } from "@/lib/types";
+import { Macros, Recipe } from "@/lib/types";
 
 type Props = {
   recipe: Recipe;
   eaten: boolean;
   onToggle: () => void;
   badge?: string;
+  override?: Macros;
+  onSaveOverride?: (macros: Macros) => void;
+  onClearOverride?: () => void;
 };
 
-export default function RecipeCard({ recipe, eaten, onToggle, badge }: Props) {
+export default function RecipeCard({
+  recipe,
+  eaten,
+  onToggle,
+  badge,
+  override,
+  onSaveOverride,
+  onClearOverride,
+}: Props) {
   const [showSteps, setShowSteps] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState<Macros>(override ?? recipe.macros);
+
+  const effective = override ?? recipe.macros;
+  const editable = !!onSaveOverride;
+
+  const startEdit = () => {
+    setDraft(effective);
+    setEditing(true);
+  };
+
+  const editField = (field: keyof Macros, value: number) => {
+    setDraft((d) => ({ ...d, [field]: Math.max(0, value) }));
+  };
+
+  const save = () => {
+    onSaveOverride?.(draft);
+    setEditing(false);
+  };
 
   return (
     <div
@@ -52,10 +82,18 @@ export default function RecipeCard({ recipe, eaten, onToggle, badge }: Props) {
                 {badge}
               </span>
             )}
+            {override && (
+              <span
+                className="text-[10px] uppercase tracking-wide rounded-full px-2 py-0.5 font-medium"
+                style={{ background: "color-mix(in oklab, var(--brand-orange) 16%, transparent)", color: "var(--brand-orange)" }}
+              >
+                editado
+              </span>
+            )}
           </div>
           <p className="text-xs mt-1" style={{ color: "var(--text-secondary)" }}>
-            ⏱ {recipe.prepMinutes} min · {recipe.macros.kcal} kcal · P{recipe.macros.protein}g
-            · C{recipe.macros.carbs}g · G{recipe.macros.fat}g
+            ⏱ {recipe.prepMinutes} min · {effective.kcal} kcal · P{effective.protein}g · C
+            {effective.carbs}g · G{effective.fat}g
           </p>
         </div>
         <button
@@ -71,13 +109,108 @@ export default function RecipeCard({ recipe, eaten, onToggle, badge }: Props) {
         </button>
       </div>
 
-      <button
-        onClick={() => setShowSteps((s) => !s)}
-        className="mt-2 text-xs font-medium hover:underline"
-        style={{ color: "var(--macro-protein)" }}
-      >
-        {showSteps ? "Ocultar receta" : "Ver receta rápida"}
-      </button>
+      <div className="flex items-center gap-3 mt-2 flex-wrap">
+        <button
+          onClick={() => setShowSteps((s) => !s)}
+          className="text-xs font-medium hover:underline"
+          style={{ color: "var(--macro-protein)" }}
+        >
+          {showSteps ? "Ocultar receta" : "Ver receta rápida"}
+        </button>
+        {editable && !editing && (
+          <button
+            onClick={startEdit}
+            className="text-xs font-medium hover:underline"
+            style={{ color: "var(--brand-orange)" }}
+          >
+            Editar macros
+          </button>
+        )}
+        {override && !editing && (
+          <button
+            onClick={onClearOverride}
+            className="text-xs hover:underline"
+            style={{ color: "var(--text-muted)" }}
+          >
+            Restablecer
+          </button>
+        )}
+      </div>
+
+      {editing && (
+        <div className="mt-3 rounded-xl p-3" style={{ background: "var(--surface-muted)" }}>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <label className="flex flex-col gap-1">
+              <span className="text-[11px]" style={{ color: "var(--text-muted)" }}>
+                Calorías
+              </span>
+              <input
+                type="number"
+                min={0}
+                value={draft.kcal}
+                onChange={(e) => editField("kcal", Number(e.target.value))}
+                className="rounded-lg border px-2 py-1.5 text-sm bg-transparent"
+                style={{ borderColor: "var(--border-hairline)" }}
+              />
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className="text-[11px]" style={{ color: "var(--text-muted)" }}>
+                Proteína (g)
+              </span>
+              <input
+                type="number"
+                min={0}
+                value={draft.protein}
+                onChange={(e) => editField("protein", Number(e.target.value))}
+                className="rounded-lg border px-2 py-1.5 text-sm bg-transparent"
+                style={{ borderColor: "var(--border-hairline)" }}
+              />
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className="text-[11px]" style={{ color: "var(--text-muted)" }}>
+                Carbs (g)
+              </span>
+              <input
+                type="number"
+                min={0}
+                value={draft.carbs}
+                onChange={(e) => editField("carbs", Number(e.target.value))}
+                className="rounded-lg border px-2 py-1.5 text-sm bg-transparent"
+                style={{ borderColor: "var(--border-hairline)" }}
+              />
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className="text-[11px]" style={{ color: "var(--text-muted)" }}>
+                Grasa (g)
+              </span>
+              <input
+                type="number"
+                min={0}
+                value={draft.fat}
+                onChange={(e) => editField("fat", Number(e.target.value))}
+                className="rounded-lg border px-2 py-1.5 text-sm bg-transparent"
+                style={{ borderColor: "var(--border-hairline)" }}
+              />
+            </label>
+          </div>
+          <div className="flex items-center justify-end gap-3 mt-2">
+            <button
+              onClick={() => setEditing(false)}
+              className="text-xs"
+              style={{ color: "var(--text-muted)" }}
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={save}
+              className="rounded-full text-white text-xs font-medium px-3.5 py-1.5"
+              style={{ background: "var(--brand-gradient)" }}
+            >
+              Guardar
+            </button>
+          </div>
+        </div>
+      )}
 
       {showSteps && (
         <div className="mt-3 space-y-3">

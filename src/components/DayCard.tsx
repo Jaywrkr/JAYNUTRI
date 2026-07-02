@@ -1,11 +1,9 @@
 "use client";
 
 import { DayPlan, DayLog, ExtraEntry, Macros, MomLunchLog } from "@/lib/types";
-import { scaleMacros } from "@/lib/nutrition";
 import RecipeCard from "./RecipeCard";
 import MomLunchLogger from "./MomLunchLogger";
 import SnackLogger from "./SnackLogger";
-import PortionAdjuster from "./PortionAdjuster";
 
 type Props = {
   day: DayPlan;
@@ -16,7 +14,12 @@ type Props = {
   onClearMomLunch: () => void;
   onAddExtra: (entry: ExtraEntry) => void;
   onRemoveExtra: (id: string) => void;
-  onLunchPortionChange: (portion: number) => void;
+  onSaveBreakfastOverride: (macros: Macros) => void;
+  onClearBreakfastOverride: () => void;
+  onSaveLunchOverride: (macros: Macros) => void;
+  onClearLunchOverride: () => void;
+  onSaveDinnerOverride: (macros: Macros) => void;
+  onClearDinnerOverride: () => void;
 };
 
 export default function DayCard({
@@ -28,19 +31,27 @@ export default function DayCard({
   onClearMomLunch,
   onAddExtra,
   onRemoveExtra,
-  onLunchPortionChange,
+  onSaveBreakfastOverride,
+  onClearBreakfastOverride,
+  onSaveLunchOverride,
+  onClearLunchOverride,
+  onSaveDinnerOverride,
+  onClearDinnerOverride,
 }: Props) {
+  const breakfastMacros = log.breakfastOverride ?? day.breakfast.macros;
+  const dinnerMacros = log.dinnerOverride ?? day.dinner.macros;
+
   const consumedSoFar: Macros = { kcal: 0, protein: 0, carbs: 0, fat: 0 };
   if (log.breakfastEaten) {
-    consumedSoFar.kcal += day.breakfast.macros.kcal;
-    consumedSoFar.protein += day.breakfast.macros.protein;
-    consumedSoFar.carbs += day.breakfast.macros.carbs;
-    consumedSoFar.fat += day.breakfast.macros.fat;
+    consumedSoFar.kcal += breakfastMacros.kcal;
+    consumedSoFar.protein += breakfastMacros.protein;
+    consumedSoFar.carbs += breakfastMacros.carbs;
+    consumedSoFar.fat += breakfastMacros.fat;
   }
   if (log.lunchEaten) {
     const lunchMacros =
       day.lunch.type === "recipe"
-        ? scaleMacros(day.lunch.recipe.macros, log.lunchPortion)
+        ? log.lunchOverride ?? day.lunch.recipe.macros
         : log.momLunch?.macros;
     if (lunchMacros) {
       consumedSoFar.kcal += lunchMacros.kcal;
@@ -63,7 +74,7 @@ export default function DayCard({
     fat: Math.max(0, dailyTarget.fat - consumedSoFar.fat),
   };
 
-  const dinnerFit = day.dinner.macros.kcal - remaining.kcal;
+  const dinnerFit = dinnerMacros.kcal - remaining.kcal;
 
   return (
     <div className="glass-card rounded-[28px] p-5 space-y-4">
@@ -87,6 +98,9 @@ export default function DayCard({
           recipe={day.breakfast}
           eaten={log.breakfastEaten}
           onToggle={() => onToggleMeal("breakfastEaten")}
+          override={log.breakfastOverride}
+          onSaveOverride={onSaveBreakfastOverride}
+          onClearOverride={onClearBreakfastOverride}
         />
       </div>
 
@@ -95,18 +109,14 @@ export default function DayCard({
           Almuerzo
         </p>
         {day.lunch.type === "recipe" ? (
-          <div>
-            <RecipeCard
-              recipe={day.lunch.recipe}
-              eaten={log.lunchEaten}
-              onToggle={() => onToggleMeal("lunchEaten")}
-            />
-            <PortionAdjuster
-              baseMacros={day.lunch.recipe.macros}
-              portion={log.lunchPortion}
-              onChange={onLunchPortionChange}
-            />
-          </div>
+          <RecipeCard
+            recipe={day.lunch.recipe}
+            eaten={log.lunchEaten}
+            onToggle={() => onToggleMeal("lunchEaten")}
+            override={log.lunchOverride}
+            onSaveOverride={onSaveLunchOverride}
+            onClearOverride={onClearLunchOverride}
+          />
         ) : (
           <div className="space-y-2">
             <MomLunchLogger
@@ -138,6 +148,9 @@ export default function DayCard({
           recipe={day.dinner}
           eaten={log.dinnerEaten}
           onToggle={() => onToggleMeal("dinnerEaten")}
+          override={log.dinnerOverride}
+          onSaveOverride={onSaveDinnerOverride}
+          onClearOverride={onClearDinnerOverride}
         />
       </div>
 

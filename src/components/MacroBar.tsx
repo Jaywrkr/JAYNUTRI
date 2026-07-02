@@ -30,14 +30,15 @@ const DOT: Record<MacroColor, string> = {
 
 export default function MacroBar({ label, current, target, unit, color, tip }: Props) {
   const [width, setWidth] = useState(0);
-  const pct = target > 0 ? Math.min(100, Math.round((current / target) * 100)) : 0;
+  // Objetivo obligatorio: hay que LLEGAR al 100%, no quedarse corto por seguridad.
+  const realPct = target > 0 ? Math.round((current / target) * 100) : 0;
+  const barPct = Math.min(100, realPct);
+  const done = realPct >= 100;
 
   useEffect(() => {
-    const t = setTimeout(() => setWidth(pct), 80);
+    const t = setTimeout(() => setWidth(barPct), 80);
     return () => clearTimeout(t);
-  }, [pct]);
-
-  const over = current > target;
+  }, [barPct]);
 
   return (
     <div>
@@ -52,8 +53,12 @@ export default function MacroBar({ label, current, target, unit, color, tip }: P
         </span>
         <span style={{ color: "var(--text-secondary)" }} className="tabular-nums text-xs sm:text-sm">
           {Math.round(current)} / {Math.round(target)} {unit}
-          <span className="ml-1.5 font-semibold" style={{ color: "var(--foreground)" }}>
-            {pct}%
+          <span
+            className="ml-1.5 font-semibold"
+            style={{ color: done ? "var(--brand-orange)" : "var(--foreground)" }}
+          >
+            {done ? "✓ " : ""}
+            {realPct}%
           </span>
         </span>
       </div>
@@ -65,9 +70,7 @@ export default function MacroBar({ label, current, target, unit, color, tip }: P
           className="h-full rounded-full transition-[width] duration-1000 ease-out"
           style={{
             width: `${width}%`,
-            background: over
-              ? "linear-gradient(90deg, #fab219, #eb6834)"
-              : GRADIENTS[color],
+            background: GRADIENTS[color],
             boxShadow: `0 0 12px 0 color-mix(in oklab, ${DOT[color]} 55%, transparent)`,
           }}
         />

@@ -15,7 +15,7 @@ const KEYS = {
 export type WeekLogs = Record<DayKey, DayLog>;
 
 function emptyDayLog(): DayLog {
-  return { breakfastEaten: false, lunchEaten: false, dinnerEaten: false, extras: [], lunchPortion: 1 };
+  return { breakfastEaten: false, lunchEaten: false, dinnerEaten: false, extras: [] };
 }
 
 export function emptyLogs(): WeekLogs {
@@ -42,7 +42,6 @@ export function loadLogs(): WeekLogs {
         ...merged[day],
         ...stored[day],
         extras: stored[day]?.extras ?? [],
-        lunchPortion: stored[day]?.lunchPortion ?? 1,
       };
     }
     return merged;

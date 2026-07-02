@@ -32,20 +32,32 @@ const BASELINE = 128;
 const ARCS = [40, 62, 84, 106, 128, 150];
 
 export default function HeroStat({ label, consumed, target, dayLabel }: Props) {
+  // Objetivo obligatorio: hay que llegar al 100%, no un techo que no se debe cruzar.
   const remaining = Math.max(0, target.kcal - consumed.kcal);
-  const pct = target.kcal > 0 ? Math.min(1, consumed.kcal / target.kcal) : 0;
-  const displayValue = useCountUp(remaining);
+  const pct = target.kcal > 0 ? consumed.kcal / target.kcal : 0;
+  const done = pct >= 1;
+  const displayValue = useCountUp(done ? consumed.kcal : remaining);
 
-  const dotX = 24 + pct * (WIDTH - 48);
+  const dotX = 24 + Math.min(1, pct) * (WIDTH - 48);
 
   return (
     <div className="brand-card rounded-[32px] relative overflow-hidden min-h-[280px] flex flex-col justify-between">
-      <p
-        className="text-[11px] font-medium uppercase tracking-[0.15em] pt-6 px-6"
-        style={{ color: "rgba(255,255,255,0.45)" }}
-      >
-        {label} · {dayLabel}
-      </p>
+      <div className="flex items-center justify-between pt-6 px-6">
+        <p
+          className="text-[11px] font-medium uppercase tracking-[0.15em]"
+          style={{ color: "rgba(255,255,255,0.45)" }}
+        >
+          {label} · {dayLabel}
+        </p>
+        {done && (
+          <span
+            className="text-[11px] font-semibold uppercase tracking-wide rounded-full px-2.5 py-1"
+            style={{ background: "var(--brand-orange)", color: "white" }}
+          >
+            ✓ cumplido
+          </span>
+        )}
+      </div>
 
       <svg
         viewBox={`0 0 ${WIDTH} 170`}
@@ -85,8 +97,10 @@ export default function HeroStat({ label, consumed, target, dayLabel }: Props) {
         <p className="text-4xl sm:text-5xl font-bold tracking-tight leading-none text-white tabular-nums">
           {displayValue}
         </p>
-        <p className="text-sm mt-2 lowercase" style={{ color: "rgba(255,255,255,0.6)" }}>
-          kcal restantes de {target.kcal} hoy
+        <p className="text-sm mt-2" style={{ color: "rgba(255,255,255,0.6)" }}>
+          {done
+            ? `kcal de tu objetivo obligatorio de ${target.kcal} hoy`
+            : `kcal que faltan para completar tu objetivo de ${target.kcal} hoy`}
         </p>
       </div>
     </div>

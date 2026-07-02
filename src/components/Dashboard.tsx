@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { DAY_ORDER, WEEK_PLAN } from "@/lib/mealPlan";
-import { calcTargets, scaleMacros, sumMacros } from "@/lib/nutrition";
+import { calcTargets, sumMacros } from "@/lib/nutrition";
 import { buildWeeklyInsight } from "@/lib/insights";
 import { computeStreak, toISODate } from "@/lib/streak";
 import { DayKey, ExtraEntry, Macros, MomLunchLog } from "@/lib/types";
@@ -30,7 +30,7 @@ import WeeklyMacroBars from "./WeeklyMacroBars";
 import DaySelector from "./DaySelector";
 import DayCard from "./DayCard";
 import ShoppingCart from "./ShoppingCart";
-import MobileTabBar from "./MobileTabBar";
+import TabBar, { TabId } from "./TabBar";
 import { useToast } from "./Toast";
 
 const DOW_MAP: DayKey[] = ["domingo", "lunes", "martes", "miercoles", "jueves", "viernes", "sabado"];
@@ -51,6 +51,7 @@ export default function Dashboard() {
   const [todayKey, setTodayKey] = useState<DayKey>("lunes");
   const [todayLabel, setTodayLabel] = useState("");
   const [todayISO, setTodayISO] = useState("");
+  const [activeTab, setActiveTab] = useState<TabId>("hoy");
   const { showToast } = useToast();
 
   useEffect(() => {
@@ -118,15 +119,15 @@ export default function Dashboard() {
       const plan = WEEK_PLAN.find((p) => p.day === day)!;
       const log = logs[day];
       const all: Macros[] = [];
-      if (log.breakfastEaten) all.push(plan.breakfast.macros);
+      if (log.breakfastEaten) all.push(log.breakfastOverride ?? plan.breakfast.macros);
       if (log.lunchEaten) {
         if (plan.lunch.type === "recipe") {
-          all.push(scaleMacros(plan.lunch.recipe.macros, log.lunchPortion));
+          all.push(log.lunchOverride ?? plan.lunch.recipe.macros);
         } else if (log.momLunch) {
           all.push(log.momLunch.macros);
         }
       }
-      if (log.dinnerEaten) all.push(plan.dinner.macros);
+      if (log.dinnerEaten) all.push(log.dinnerOverride ?? plan.dinner.macros);
       all.push(...log.extras.map((e) => e.macros));
       return sumMacros(all);
     },
@@ -170,7 +171,7 @@ export default function Dashboard() {
     if (!plan || !log) return [];
     const lunchKcal =
       plan.lunch.type === "recipe"
-        ? scaleMacros(plan.lunch.recipe.macros, log.lunchPortion).kcal
+        ? (log.lunchOverride ?? plan.lunch.recipe.macros).kcal
         : log.momLunch?.macros.kcal ?? 0;
     const lunchSub =
       plan.lunch.type === "recipe" ? plan.lunch.recipe.name : log.momLunch?.description || "Casa de mamá";
@@ -180,7 +181,7 @@ export default function Dashboard() {
         iconBg: "color-mix(in oklab, var(--macro-fat) 20%, transparent)",
         label: "Desayuno",
         sublabel: plan.breakfast.name,
-        kcal: plan.breakfast.macros.kcal,
+        kcal: (log.breakfastOverride ?? plan.breakfast.macros).kcal,
         eaten: log.breakfastEaten,
       },
       {
@@ -196,7 +197,7 @@ export default function Dashboard() {
         iconBg: "color-mix(in oklab, var(--macro-carbs) 20%, transparent)",
         label: "Cena",
         sublabel: plan.dinner.name,
-        kcal: plan.dinner.macros.kcal,
+        kcal: (log.dinnerOverride ?? plan.dinner.macros).kcal,
         eaten: log.dinnerEaten,
       },
     ];
@@ -250,8 +251,20 @@ export default function Dashboard() {
     }));
   };
 
-  const setLunchPortion = (day: DayKey, portion: number) => {
-    setLogs((prev) => ({ ...prev, [day]: { ...prev[day], lunchPortion: portion } }));
+  const saveOverride = (
+    day: DayKey,
+    field: "breakfastOverride" | "lunchOverride" | "dinnerOverride",
+    macros: Macros
+  ) => {
+    setLogs((prev) => ({ ...prev, [day]: { ...prev[day], [field]: macros } }));
+    showToast("Macros actualizados ✓");
+  };
+
+  const clearOverride = (
+    day: DayKey,
+    field: "breakfastOverride" | "lunchOverride" | "dinnerOverride"
+  ) => {
+    setLogs((prev) => ({ ...prev, [day]: { ...prev[day], [field]: undefined } }));
   };
 
   const currentDayPlan = WEEK_PLAN.find((d) => d.day === activeDay)!;
@@ -260,84 +273,132 @@ export default function Dashboard() {
     <>
       <NavBar todayLabel={todayLabel} />
       <div className="mx-auto max-w-5xl w-full px-4 sm:px-6 py-8 space-y-6">
-        <header className="pt-1" id="hoy">
-          <div className="flex items-center justify-between flex-wrap gap-2">
-            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight gradient-text">
-              Plan semanal de Jay
-            </h1>
-            <StreakBadge streak={streak} />
-          </div>
-          <p className="text-xs sm:text-sm mt-2" style={{ color: "var(--text-muted)" }}>
-            Cuenca, Ecuador · compra única los domingos · batch cooking · sin melón, sin azúcar,
-            sin procesados
-          </p>
-        </header>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            className="space-y-6"
+          >
+            {activeTab === "hoy" && (
+              <>
+                <header className="pt-1">
+                  <div className="flex items-center justify-between flex-wrap gap-2">
+                    <h1 className="text-3xl sm:text-4xl font-bold tracking-tight gradient-text">
+                      Plan semanal de Jay
+                    </h1>
+                    <StreakBadge streak={streak} />
+                  </div>
+                  <p className="text-xs sm:text-sm mt-2" style={{ color: "var(--text-muted)" }}>
+                    Cuenca, Ecuador · compra única los domingos · batch cooking · sin melón, sin
+                    azúcar, sin procesados
+                  </p>
+                </header>
 
-        <div className="grid lg:grid-cols-[1.1fr_1.4fr] gap-4 items-stretch">
-          <HeroStat
-            label="Hoy"
-            consumed={todayConsumed}
-            target={dailyTarget}
-            dayLabel={WEEK_PLAN.find((d) => d.day === todayKey)?.label.split(" ")[0] ?? ""}
-          />
-          <ProfileCalculator profile={profile} onChange={setProfile} />
-        </div>
+                <HeroStat
+                  label="Hoy"
+                  consumed={todayConsumed}
+                  target={dailyTarget}
+                  dayLabel={WEEK_PLAN.find((d) => d.day === todayKey)?.label.split(" ")[0] ?? ""}
+                />
 
-        <SundayBanner />
+                <SundayBanner />
 
-        <InsightsCard
-          weekData={weekData}
-          weeklyConsumed={weeklyConsumed}
-          weeklyTarget={weeklyTarget}
-          todayRows={todayRows}
-        />
+                <InsightsCard
+                  weekData={weekData}
+                  weeklyConsumed={weeklyConsumed}
+                  weeklyTarget={weeklyTarget}
+                  todayRows={todayRows}
+                />
 
-        <DailyMacroBars consumed={todayConsumed} target={dailyTarget} />
+                <DailyMacroBars consumed={todayConsumed} target={dailyTarget} />
 
-        <WeeklyMacroBars consumed={weeklyConsumed} weeklyTarget={weeklyTarget} insight={insight} />
+                <WeeklyMacroBars
+                  consumed={weeklyConsumed}
+                  weeklyTarget={weeklyTarget}
+                  insight={insight}
+                />
+              </>
+            )}
 
-        <section id="semana" className="scroll-mt-20">
-          <div className="flex items-center gap-2 mb-3">
-            <span className="grid place-items-center h-8 w-8 rounded-xl text-base bg-[color-mix(in_oklab,var(--macro-carbs)_18%,transparent)]">
-              📅
-            </span>
-            <h2 className="text-lg font-semibold">Plan de comidas de la semana</h2>
-          </div>
+            {activeTab === "semana" && (
+              <>
+                <header className="pt-1">
+                  <h1 className="text-3xl sm:text-4xl font-bold tracking-tight gradient-text">
+                    Plan de comidas
+                  </h1>
+                  <p className="text-xs sm:text-sm mt-2" style={{ color: "var(--text-muted)" }}>
+                    Toca un día para ver y editar sus comidas.
+                  </p>
+                </header>
 
-          <DaySelector activeDay={activeDay} onChange={setActiveDay} todayKey={todayKey} logs={logs} />
+                <DaySelector
+                  activeDay={activeDay}
+                  onChange={setActiveDay}
+                  todayKey={todayKey}
+                  logs={logs}
+                />
 
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activeDay}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <DayCard
-                day={currentDayPlan}
-                log={logs[activeDay]}
-                dailyTarget={dailyTarget}
-                onToggleMeal={(meal) => toggleMeal(activeDay, meal)}
-                onSaveMomLunch={(log) => saveMomLunch(activeDay, log)}
-                onClearMomLunch={() => clearMomLunch(activeDay)}
-                onAddExtra={(entry) => addExtra(activeDay, entry)}
-                onRemoveExtra={(id) => removeExtra(activeDay, id)}
-                onLunchPortionChange={(portion) => setLunchPortion(activeDay, portion)}
-              />
-            </motion.div>
-          </AnimatePresence>
-        </section>
+                <DayCard
+                  day={currentDayPlan}
+                  log={logs[activeDay]}
+                  dailyTarget={dailyTarget}
+                  onToggleMeal={(meal) => toggleMeal(activeDay, meal)}
+                  onSaveMomLunch={(log) => saveMomLunch(activeDay, log)}
+                  onClearMomLunch={() => clearMomLunch(activeDay)}
+                  onAddExtra={(entry) => addExtra(activeDay, entry)}
+                  onRemoveExtra={(id) => removeExtra(activeDay, id)}
+                  onSaveBreakfastOverride={(m) => saveOverride(activeDay, "breakfastOverride", m)}
+                  onClearBreakfastOverride={() => clearOverride(activeDay, "breakfastOverride")}
+                  onSaveLunchOverride={(m) => saveOverride(activeDay, "lunchOverride", m)}
+                  onClearLunchOverride={() => clearOverride(activeDay, "lunchOverride")}
+                  onSaveDinnerOverride={(m) => saveOverride(activeDay, "dinnerOverride", m)}
+                  onClearDinnerOverride={() => clearOverride(activeDay, "dinnerOverride")}
+                />
+              </>
+            )}
 
-        <ShoppingCart budget={budget} onBudgetChange={setBudget} />
+            {activeTab === "carrito" && (
+              <>
+                <header className="pt-1">
+                  <h1 className="text-3xl sm:text-4xl font-bold tracking-tight gradient-text">
+                    Carrito de compras
+                  </h1>
+                  <p className="text-xs sm:text-sm mt-2" style={{ color: "var(--text-muted)" }}>
+                    Lista generada automáticamente a partir del plan de la semana.
+                  </p>
+                </header>
+
+                <ShoppingCart budget={budget} onBudgetChange={setBudget} />
+              </>
+            )}
+
+            {activeTab === "perfil" && (
+              <>
+                <header className="pt-1">
+                  <h1 className="text-3xl sm:text-4xl font-bold tracking-tight gradient-text">
+                    Perfil
+                  </h1>
+                  <p className="text-xs sm:text-sm mt-2" style={{ color: "var(--text-muted)" }}>
+                    Tus datos y objetivo calórico.
+                  </p>
+                </header>
+
+                <ProfileCalculator profile={profile} onChange={setProfile} />
+              </>
+            )}
+          </motion.div>
+        </AnimatePresence>
 
         <footer className="text-xs text-center pt-4 pb-2" style={{ color: "var(--text-muted)" }}>
           Hecho para Jay · datos guardados solo en este navegador (localStorage)
         </footer>
 
-        <div className="mobile-tabbar-spacer sm:hidden" aria-hidden />
+        <div className="mobile-tabbar-spacer" aria-hidden />
       </div>
-      <MobileTabBar />
+      <TabBar active={activeTab} onChange={setActiveTab} />
     </>
   );
 }

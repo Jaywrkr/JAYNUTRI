@@ -77,7 +77,12 @@ export type DayLog = {
   dinnerEaten: boolean;
   momLunch?: MomLunchLog;
   extras: ExtraEntry[];
-  lunchPortion: number; // multiplicador sobre la receta del almuerzo (sábado/domingo)
+  // Overrides opcionales: si están presentes, reemplazan los macros por
+  // defecto de la receta para ese día/comida (desayuno, cena, o almuerzo
+  // cuando es tipo "recipe" — sábado/domingo).
+  breakfastOverride?: Macros;
+  lunchOverride?: Macros;
+  dinnerOverride?: Macros;
 };
 
 export type Profile = {
