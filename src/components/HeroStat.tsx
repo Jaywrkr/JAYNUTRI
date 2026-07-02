@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { animate } from "motion/react";
+import { animate, motion } from "motion/react";
 import { Macros } from "@/lib/types";
 
 type Props = {
@@ -26,62 +26,67 @@ function useCountUp(value: number, duration = 1) {
   return display;
 }
 
+const WIDTH = 320;
+const CENTER = WIDTH / 2;
+const BASELINE = 128;
+const ARCS = [40, 62, 84, 106, 128, 150];
+
 export default function HeroStat({ label, consumed, target, dayLabel }: Props) {
   const remaining = Math.max(0, target.kcal - consumed.kcal);
   const pct = target.kcal > 0 ? Math.min(1, consumed.kcal / target.kcal) : 0;
   const displayValue = useCountUp(remaining);
 
-  const radius = 64;
-  const circumference = 2 * Math.PI * radius;
-  const [dash, setDash] = useState(circumference);
-
-  useEffect(() => {
-    const controls = animate(circumference, circumference * (1 - pct), {
-      duration: 1.1,
-      ease: [0.16, 1, 0.3, 1],
-      onUpdate: (v) => setDash(v),
-    });
-    return () => controls.stop();
-  }, [pct, circumference]);
+  const dotX = 24 + pct * (WIDTH - 48);
 
   return (
-    <div className="glass-card rounded-[28px] p-6 sm:p-7 flex items-center gap-6 relative overflow-hidden">
-      <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full opacity-20 blur-2xl pointer-events-none" style={{ background: "var(--brand-gradient)" }} />
-      <div className="relative shrink-0">
-        <svg width="152" height="152" viewBox="0 0 152 152" className="-rotate-90">
-          <circle cx="76" cy="76" r={radius} fill="none" stroke="var(--surface-muted)" strokeWidth="12" />
-          <circle
-            cx="76"
-            cy="76"
-            r={radius}
+    <div className="brand-card rounded-[32px] relative overflow-hidden min-h-[280px] flex flex-col justify-between">
+      <p
+        className="text-[11px] font-medium uppercase tracking-[0.15em] pt-6 px-6"
+        style={{ color: "rgba(255,255,255,0.45)" }}
+      >
+        {label} · {dayLabel}
+      </p>
+
+      <svg
+        viewBox={`0 0 ${WIDTH} 170`}
+        className="w-full h-[150px]"
+        preserveAspectRatio="xMidYMax meet"
+        aria-hidden
+      >
+        {ARCS.map((r, i) => (
+          <path
+            key={r}
+            d={`M ${CENTER - r} ${BASELINE} A ${r} ${r * 0.72} 0 0 1 ${CENTER + r} ${BASELINE}`}
             fill="none"
-            stroke="url(#heroGradient)"
-            strokeWidth="12"
-            strokeLinecap="round"
-            strokeDasharray={circumference}
-            strokeDashoffset={dash}
+            stroke="rgba(255,255,255,0.9)"
+            strokeWidth="1"
+            opacity={0.08 + i * 0.05}
           />
-          <defs>
-            <linearGradient id="heroGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="var(--macro-kcal)" />
-              <stop offset="55%" stopColor="var(--macro-protein)" />
-              <stop offset="100%" stopColor="var(--macro-carbs)" />
-            </linearGradient>
-          </defs>
-        </svg>
-        <div className="absolute inset-0 grid place-items-center">
-          <span className="text-2xl">🔥</span>
-        </div>
-      </div>
-      <div className="relative min-w-0">
-        <p className="text-xs font-medium uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>
-          {label} · {dayLabel}
-        </p>
-        <p className="text-5xl sm:text-6xl font-bold tracking-tight gradient-text tabular-nums leading-none mt-1">
+        ))}
+        <line
+          x1="16"
+          y1={BASELINE}
+          x2={WIDTH - 16}
+          y2={BASELINE}
+          stroke="rgba(255,255,255,0.35)"
+          strokeWidth="1"
+        />
+        <motion.circle
+          cy={BASELINE}
+          r="9"
+          fill="var(--brand-orange)"
+          initial={false}
+          animate={{ cx: dotX }}
+          transition={{ type: "spring", stiffness: 120, damping: 18 }}
+        />
+      </svg>
+
+      <div className="px-6 pb-6">
+        <p className="text-4xl sm:text-5xl font-bold tracking-tight leading-none text-white tabular-nums">
           {displayValue}
         </p>
-        <p className="text-sm mt-1.5" style={{ color: "var(--text-secondary)" }}>
-          kcal restantes de {target.kcal}
+        <p className="text-sm mt-2 lowercase" style={{ color: "rgba(255,255,255,0.6)" }}>
+          kcal restantes de {target.kcal} hoy
         </p>
       </div>
     </div>

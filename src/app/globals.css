@@ -1,14 +1,23 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f9f9f7;
-  --foreground: #0b0b0b;
+  --background: #f2efe7;
+  --foreground: #0d0d0d;
 
   --surface: #ffffff;
-  --surface-muted: #f4f4f2;
-  --border-hairline: rgba(11, 11, 11, 0.08);
-  --text-secondary: #56554f;
-  --text-muted: #8b897f;
+  --surface-muted: #ece8de;
+  --border-hairline: rgba(13, 13, 13, 0.1);
+  --text-secondary: #55534a;
+  --text-muted: #8a877a;
+
+  /* brand palette: black / orange / deep green, editorial fintech look */
+  --brand-black: #0d0d0d;
+  --brand-black-2: #1c1c1c;
+  --brand-orange: #ff5a1f;
+  --brand-orange-2: #ff8a4c;
+  --brand-green: #163d2c;
+  --brand-green-2: #1f5c40;
+  --brand-cream: #f2efe7;
 
   /* macro accent colors (validated categorical slots) */
   --macro-kcal: #2a78d6;
@@ -20,12 +29,7 @@
   --macro-fat: #eb6834;
   --macro-fat-2: #ffab7a;
 
-  --brand-gradient: linear-gradient(
-    100deg,
-    var(--macro-kcal) 0%,
-    var(--macro-protein) 45%,
-    var(--macro-carbs) 100%
-  );
+  --brand-gradient: linear-gradient(100deg, var(--brand-orange) 0%, var(--brand-orange-2) 100%);
 
   --text-scale: 1;
 }
@@ -41,14 +45,22 @@
    inline script in layout.tsx that sets this class before first paint, so the
    whole app reads from these class-scoped tokens instead of a media query. */
 html.dark {
-  --background: #0a0a0c;
-  --foreground: #f5f5f3;
+  --background: #121210;
+  --foreground: #f5f4ef;
 
-  --surface: rgba(255, 255, 255, 0.045);
-  --surface-muted: rgba(255, 255, 255, 0.03);
-  --border-hairline: rgba(255, 255, 255, 0.09);
-  --text-secondary: #c3c2b7;
-  --text-muted: #8b897f;
+  --surface: #1a1a17;
+  --surface-muted: #201f1b;
+  --border-hairline: rgba(255, 255, 255, 0.1);
+  --text-secondary: #c3c1b6;
+  --text-muted: #8b897d;
+
+  --brand-black: #000000;
+  --brand-black-2: #141412;
+  --brand-orange: #ff6a33;
+  --brand-orange-2: #ff9863;
+  --brand-green: #1f5c40;
+  --brand-green-2: #29714f;
+  --brand-cream: #1a1a17;
 
   --macro-kcal: #3987e5;
   --macro-kcal-2: #7fbaff;
@@ -76,64 +88,37 @@ body {
 }
 
 :focus-visible {
-  outline: 2px solid var(--macro-protein);
+  outline: 2px solid var(--brand-orange);
   outline-offset: 2px;
 }
 
-/* Soft mesh-gradient backdrop, fixed behind all content, slowly drifting */
-.mesh-backdrop {
-  position: fixed;
-  inset: -10%;
-  z-index: -2;
-  pointer-events: none;
-  background:
-    radial-gradient(circle at 10% 6%, color-mix(in oklab, var(--macro-kcal) 38%, transparent) 0%, transparent 45%),
-    radial-gradient(circle at 92% 10%, color-mix(in oklab, var(--macro-protein) 34%, transparent) 0%, transparent 42%),
-    radial-gradient(circle at 80% 60%, color-mix(in oklab, var(--macro-fat) 22%, transparent) 0%, transparent 40%),
-    radial-gradient(circle at 15% 85%, color-mix(in oklab, var(--macro-carbs) 30%, transparent) 0%, transparent 48%);
-  filter: blur(60px);
-  animation: mesh-drift 26s ease-in-out infinite alternate;
-}
-
-@keyframes mesh-drift {
-  0% { transform: translate3d(0, 0, 0) scale(1); }
-  50% { transform: translate3d(1.5%, -2%, 0) scale(1.04); }
-  100% { transform: translate3d(-1.5%, 1.5%, 0) scale(1.02); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .mesh-backdrop { animation: none; }
-}
-
-/* Subtle grain to keep flat gradients from banding, premium-print feel */
-.grain-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  opacity: 0.5;
-  mix-blend-mode: overlay;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.35'/></svg>");
-}
-
+/* Flat editorial card: solid surface, thin hairline border, no blur/glow */
 .glass-card {
   background: var(--surface);
   border: 1px solid var(--border-hairline);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  box-shadow: 0 1px 2px rgba(11, 11, 11, 0.04), 0 12px 32px -16px rgba(11, 11, 11, 0.12);
+  box-shadow: 0 1px 2px rgba(13, 13, 13, 0.03);
   transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-html.dark .glass-card {
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 20px 48px -24px rgba(0, 0, 0, 0.6);
 }
 
 @media (hover: hover) {
   .glass-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 1px 2px rgba(11, 11, 11, 0.05), 0 20px 40px -16px rgba(11, 11, 11, 0.18);
+    box-shadow: 0 10px 24px -14px rgba(13, 13, 13, 0.18);
   }
+}
+
+/* Solid black brand card (hero, card-manager style panels) */
+.brand-card {
+  background: var(--brand-black);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Solid deep-green brand card (insights style panels) */
+.green-card {
+  background: var(--brand-green);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .gradient-text {
@@ -143,26 +128,9 @@ html.dark .glass-card {
   color: transparent;
 }
 
-.gradient-ring {
-  position: relative;
-}
-.gradient-ring::before {
-  content: "";
-  position: absolute;
-  inset: -1px;
-  border-radius: inherit;
-  padding: 1px;
-  background: var(--brand-gradient);
-  opacity: 0.5;
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events: none;
-}
-
 /* Mobile bottom tab bar: keep content from being hidden behind it, respect safe-area */
 .mobile-tabbar-spacer {
-  height: calc(64px + env(safe-area-inset-bottom, 0px));
+  height: calc(76px + env(safe-area-inset-bottom, 0px));
 }
 
 @media print {
@@ -172,11 +140,6 @@ html.dark .glass-card {
   .glass-card {
     box-shadow: none !important;
     border: 1px solid #ddd !important;
-    backdrop-filter: none !important;
-  }
-  .mesh-backdrop,
-  .grain-overlay {
-    display: none !important;
   }
   body {
     background: white !important;

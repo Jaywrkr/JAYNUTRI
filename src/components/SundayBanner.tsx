@@ -66,13 +66,7 @@ export default function SundayBanner() {
   }
 
   return (
-    <div
-      className="rounded-[28px] p-5 sm:p-6 text-white relative overflow-hidden"
-      style={{
-        background:
-          "linear-gradient(120deg, var(--macro-protein) 0%, var(--macro-kcal) 55%, var(--macro-carbs) 100%)",
-      }}
-    >
+    <div className="green-card rounded-[32px] p-5 sm:p-6 relative overflow-hidden">
       <div className="flex items-start justify-between gap-3 flex-wrap relative">
         <div>
           <h2 className="text-lg font-semibold flex items-center gap-2">
@@ -114,7 +108,7 @@ export default function SundayBanner() {
               >
                 <span
                   className="mt-0.5 shrink-0 grid place-items-center h-4 w-4 rounded-full border border-white/60 text-[10px]"
-                  style={{ background: checked[i] ? "white" : "transparent", color: checked[i] ? "var(--macro-protein)" : "transparent" }}
+                  style={{ background: checked[i] ? "var(--brand-orange)" : "transparent", borderColor: checked[i] ? "var(--brand-orange)" : "rgba(255,255,255,0.6)", color: checked[i] ? "white" : "transparent" }}
                 >
                   ✓
                 </span>

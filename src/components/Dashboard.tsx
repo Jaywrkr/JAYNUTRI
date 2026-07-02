@@ -24,6 +24,7 @@ import HeroStat from "./HeroStat";
 import StreakBadge from "./StreakBadge";
 import ProfileCalculator from "./ProfileCalculator";
 import SundayBanner from "./SundayBanner";
+import InsightsCard from "./InsightsCard";
 import DailyMacroBars from "./DailyMacroBars";
 import WeeklyMacroBars from "./WeeklyMacroBars";
 import DaySelector from "./DaySelector";
@@ -149,6 +150,58 @@ export default function Dashboard() {
     [weeklyConsumed, weeklyTarget, elapsedFraction, ready]
   );
 
+  const weekData = useMemo(
+    () =>
+      WEEK_PLAN.map((d) => {
+        const m = macrosForDay(d.day);
+        return {
+          label: d.label.slice(0, 3),
+          kcal: m.kcal,
+          protein: m.protein,
+          isToday: d.day === todayKey,
+        };
+      }),
+    [macrosForDay, todayKey]
+  );
+
+  const todayRows = useMemo(() => {
+    const plan = WEEK_PLAN.find((d) => d.day === todayKey);
+    const log = logs[todayKey];
+    if (!plan || !log) return [];
+    const lunchKcal =
+      plan.lunch.type === "recipe"
+        ? scaleMacros(plan.lunch.recipe.macros, log.lunchPortion).kcal
+        : log.momLunch?.macros.kcal ?? 0;
+    const lunchSub =
+      plan.lunch.type === "recipe" ? plan.lunch.recipe.name : log.momLunch?.description || "Casa de mamá";
+    return [
+      {
+        icon: "🌅",
+        iconBg: "color-mix(in oklab, var(--macro-fat) 20%, transparent)",
+        label: "Desayuno",
+        sublabel: plan.breakfast.name,
+        kcal: plan.breakfast.macros.kcal,
+        eaten: log.breakfastEaten,
+      },
+      {
+        icon: "🍽️",
+        iconBg: "color-mix(in oklab, var(--brand-orange) 20%, transparent)",
+        label: "Almuerzo",
+        sublabel: lunchSub,
+        kcal: lunchKcal,
+        eaten: log.lunchEaten,
+      },
+      {
+        icon: "🌙",
+        iconBg: "color-mix(in oklab, var(--macro-carbs) 20%, transparent)",
+        label: "Cena",
+        sublabel: plan.dinner.name,
+        kcal: plan.dinner.macros.kcal,
+        eaten: log.dinnerEaten,
+      },
+    ];
+  }, [todayKey, logs]);
+
   const toggleMeal = (
     day: DayKey,
     meal: "breakfastEaten" | "lunchEaten" | "dinnerEaten"
@@ -231,6 +284,13 @@ export default function Dashboard() {
         </div>
 
         <SundayBanner />
+
+        <InsightsCard
+          weekData={weekData}
+          weeklyConsumed={weeklyConsumed}
+          weeklyTarget={weeklyTarget}
+          todayRows={todayRows}
+        />
 
         <DailyMacroBars consumed={todayConsumed} target={dailyTarget} />
 
