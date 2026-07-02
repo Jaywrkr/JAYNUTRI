@@ -7,6 +7,9 @@ const KEYS = {
   logs: "jaynutri:logs:v1",
   profile: "jaynutri:profile:v1",
   budget: "jaynutri:budget:v1",
+  completedDates: "jaynutri:completed-dates:v1",
+  theme: "jaynutri:theme:v1",
+  textScale: "jaynutri:text-scale:v1",
 };
 
 export type WeekLogs = Record<DayKey, DayLog>;
@@ -67,4 +70,47 @@ export function loadBudget(): number {
 export function saveBudget(budget: number) {
   if (typeof window === "undefined") return;
   window.localStorage.setItem(KEYS.budget, String(budget));
+}
+
+// Historial de fechas (ISO yyyy-mm-dd) en que se completaron las 3 comidas del día,
+// para poder calcular una racha real que sobrevive el cambio de semana.
+export type CompletedDates = Record<string, boolean>;
+
+export function loadCompletedDates(): CompletedDates {
+  if (typeof window === "undefined") return {};
+  try {
+    const raw = window.localStorage.getItem(KEYS.completedDates);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+}
+
+export function saveCompletedDates(dates: CompletedDates) {
+  if (typeof window === "undefined") return;
+  window.localStorage.setItem(KEYS.completedDates, JSON.stringify(dates));
+}
+
+export type Theme = "light" | "dark";
+
+export function loadTheme(): Theme | null {
+  if (typeof window === "undefined") return null;
+  const raw = window.localStorage.getItem(KEYS.theme);
+  return raw === "light" || raw === "dark" ? raw : null;
+}
+
+export function saveTheme(theme: Theme) {
+  if (typeof window === "undefined") return;
+  window.localStorage.setItem(KEYS.theme, theme);
+}
+
+export function loadTextScale(): number {
+  if (typeof window === "undefined") return 1;
+  const raw = window.localStorage.getItem(KEYS.textScale);
+  return raw ? Number(raw) : 1;
+}
+
+export function saveTextScale(scale: number) {
+  if (typeof window === "undefined") return;
+  window.localStorage.setItem(KEYS.textScale, String(scale));
 }

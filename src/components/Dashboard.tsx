@@ -2,47 +2,66 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { WEEK_PLAN } from "@/lib/mealPlan";
+import { DAY_ORDER, WEEK_PLAN } from "@/lib/mealPlan";
 import { calcTargets, sumMacros } from "@/lib/nutrition";
+import { buildWeeklyInsight } from "@/lib/insights";
+import { computeStreak, toISODate } from "@/lib/streak";
 import { DayKey, Macros, MomLunchLog } from "@/lib/types";
 import {
+  CompletedDates,
   loadBudget,
+  loadCompletedDates,
   loadLogs,
   loadProfile,
   saveBudget,
+  saveCompletedDates,
   saveLogs,
   saveProfile,
   WeekLogs,
 } from "@/lib/storage";
 import NavBar from "./NavBar";
 import HeroStat from "./HeroStat";
+import StreakBadge from "./StreakBadge";
 import ProfileCalculator from "./ProfileCalculator";
 import SundayBanner from "./SundayBanner";
 import WeeklyMacroBars from "./WeeklyMacroBars";
 import DaySelector from "./DaySelector";
 import DayCard from "./DayCard";
 import ShoppingCart from "./ShoppingCart";
+import MobileTabBar from "./MobileTabBar";
+import { useToast } from "./Toast";
 
 const DOW_MAP: DayKey[] = ["domingo", "lunes", "martes", "miercoles", "jueves", "viernes", "sabado"];
+
+const MEAL_LABEL: Record<"breakfastEaten" | "lunchEaten" | "dinnerEaten", string> = {
+  breakfastEaten: "Desayuno",
+  lunchEaten: "Almuerzo",
+  dinnerEaten: "Cena",
+};
 
 export default function Dashboard() {
   const [ready, setReady] = useState(false);
   const [profile, setProfile] = useState(loadProfile());
   const [logs, setLogs] = useState<WeekLogs>(loadLogs());
   const [budget, setBudget] = useState(loadBudget());
+  const [completedDates, setCompletedDates] = useState<CompletedDates>({});
   const [activeDay, setActiveDay] = useState<DayKey>("lunes");
   const [todayKey, setTodayKey] = useState<DayKey>("lunes");
   const [todayLabel, setTodayLabel] = useState("");
+  const [todayISO, setTodayISO] = useState("");
+  const { showToast } = useToast();
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time hydration from localStorage/Date, not derivable during SSR
     setProfile(loadProfile());
     setLogs(loadLogs());
     setBudget(loadBudget());
+    setCompletedDates(loadCompletedDates());
     const now = new Date();
     const key = DOW_MAP[now.getDay()];
     setActiveDay(key);
     setTodayKey(key);
+    setTodayISO(toISODate(now));
     setTodayLabel(
       now.toLocaleDateString("es-EC", { weekday: "long", day: "numeric", month: "long" })
     );
@@ -60,6 +79,26 @@ export default function Dashboard() {
   useEffect(() => {
     if (ready) saveBudget(budget);
   }, [budget, ready]);
+
+  // Snapshot today's completion into date-keyed history so the streak survives
+  // the weekly template resetting (logs are keyed by weekday name, not date).
+  useEffect(() => {
+    if (!ready || !todayISO) return;
+    const todayLog = logs[todayKey];
+    const isComplete = todayLog.breakfastEaten && todayLog.lunchEaten && todayLog.dinnerEaten;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- syncs a derived value into cross-session localStorage history, not a pure render derivation
+    setCompletedDates((prev) => {
+      if (!!prev[todayISO] === isComplete) return prev;
+      const next = { ...prev, [todayISO]: isComplete };
+      saveCompletedDates(next);
+      return next;
+    });
+  }, [logs, todayKey, todayISO, ready]);
+
+  const streak = useMemo(() => {
+    if (!ready || !todayISO) return 0;
+    return computeStreak(completedDates, new Date(todayISO + "T00:00:00"));
+  }, [completedDates, todayISO, ready]);
 
   const { macros: dailyTarget } = calcTargets(profile);
   const weeklyTarget: Macros = useMemo(
@@ -95,18 +134,35 @@ export default function Dashboard() {
 
   const todayConsumed = useMemo(() => macrosForDay(todayKey), [macrosForDay, todayKey]);
 
+  const elapsedFraction = useMemo(() => {
+    const idx = DAY_ORDER.indexOf(todayKey);
+    return (idx + 1) / 7;
+  }, [todayKey]);
+
+  const insight = useMemo(
+    () => buildWeeklyInsight(weeklyConsumed, weeklyTarget, ready ? elapsedFraction : 0),
+    [weeklyConsumed, weeklyTarget, elapsedFraction, ready]
+  );
+
   const toggleMeal = (
     day: DayKey,
     meal: "breakfastEaten" | "lunchEaten" | "dinnerEaten"
   ) => {
+    const willBeEaten = !logs[day][meal];
     setLogs((prev) => ({
       ...prev,
       [day]: { ...prev[day], [meal]: !prev[day][meal] },
     }));
+    if (willBeEaten) {
+      showToast(`${MEAL_LABEL[meal]} marcado como comido ✓`, () =>
+        setLogs((prev) => ({ ...prev, [day]: { ...prev[day], [meal]: false } }))
+      );
+    }
   };
 
   const saveMomLunch = (day: DayKey, log: MomLunchLog) => {
     setLogs((prev) => ({ ...prev, [day]: { ...prev[day], momLunch: log } }));
+    showToast("Almuerzo de mamá registrado — macros del día ajustados");
   };
 
   const clearMomLunch = (day: DayKey) => {
@@ -122,10 +178,13 @@ export default function Dashboard() {
     <>
       <NavBar todayLabel={todayLabel} />
       <div className="mx-auto max-w-5xl w-full px-4 sm:px-6 py-8 space-y-6">
-        <header className="pt-1">
-          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight gradient-text">
-            Plan semanal de Jay
-          </h1>
+        <header className="pt-1" id="hoy">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight gradient-text">
+              Plan semanal de Jay
+            </h1>
+            <StreakBadge streak={streak} />
+          </div>
           <p className="text-xs sm:text-sm mt-2" style={{ color: "var(--text-muted)" }}>
             Cuenca, Ecuador · compra única los domingos · batch cooking · sin melón, sin azúcar,
             sin procesados
@@ -144,9 +203,9 @@ export default function Dashboard() {
 
         <SundayBanner />
 
-        <WeeklyMacroBars consumed={weeklyConsumed} weeklyTarget={weeklyTarget} />
+        <WeeklyMacroBars consumed={weeklyConsumed} weeklyTarget={weeklyTarget} insight={insight} />
 
-        <section>
+        <section id="semana" className="scroll-mt-20">
           <div className="flex items-center gap-2 mb-3">
             <span className="grid place-items-center h-8 w-8 rounded-xl text-base bg-[color-mix(in_oklab,var(--macro-carbs)_18%,transparent)]">
               📅
@@ -154,7 +213,7 @@ export default function Dashboard() {
             <h2 className="text-lg font-semibold">Plan de comidas de la semana</h2>
           </div>
 
-          <DaySelector activeDay={activeDay} onChange={setActiveDay} />
+          <DaySelector activeDay={activeDay} onChange={setActiveDay} todayKey={todayKey} logs={logs} />
 
           <AnimatePresence mode="wait">
             <motion.div
@@ -181,7 +240,10 @@ export default function Dashboard() {
         <footer className="text-xs text-center pt-4 pb-2" style={{ color: "var(--text-muted)" }}>
           Hecho para Jay · datos guardados solo en este navegador (localStorage)
         </footer>
+
+        <div className="mobile-tabbar-spacer sm:hidden" aria-hidden />
       </div>
+      <MobileTabBar />
     </>
   );
 }

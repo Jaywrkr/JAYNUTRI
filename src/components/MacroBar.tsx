@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import InfoTooltip from "./InfoTooltip";
 
 export type MacroColor = "kcal" | "protein" | "carbs" | "fat";
 
@@ -10,6 +11,7 @@ type Props = {
   target: number;
   unit: string;
   color: MacroColor;
+  tip?: string;
 };
 
 const GRADIENTS: Record<MacroColor, string> = {
@@ -26,7 +28,7 @@ const DOT: Record<MacroColor, string> = {
   fat: "var(--macro-fat)",
 };
 
-export default function MacroBar({ label, current, target, unit, color }: Props) {
+export default function MacroBar({ label, current, target, unit, color, tip }: Props) {
   const [width, setWidth] = useState(0);
   const pct = target > 0 ? Math.min(100, Math.round((current / target) * 100)) : 0;
 
@@ -46,6 +48,7 @@ export default function MacroBar({ label, current, target, unit, color }: Props)
             style={{ background: DOT[color] }}
           />
           {label}
+          {tip && <InfoTooltip title={label}>{tip}</InfoTooltip>}
         </span>
         <span style={{ color: "var(--text-secondary)" }} className="tabular-nums text-xs sm:text-sm">
           {Math.round(current)} / {Math.round(target)} {unit}

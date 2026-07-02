@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { Profile } from "@/lib/types";
 import { calcTargets } from "@/lib/nutrition";
+import { findTerm } from "@/lib/glossary";
+import InfoTooltip from "./InfoTooltip";
 
 type Props = {
   profile: Profile;
@@ -76,8 +78,11 @@ export default function ProfileCalculator({ profile, onChange }: Props) {
             />
           </label>
           <label className="flex flex-col gap-1.5 col-span-2 sm:col-span-4">
-            <span style={{ color: "var(--text-secondary)" }}>
+            <span className="flex items-center gap-1" style={{ color: "var(--text-secondary)" }}>
               Déficit calórico ({profile.deficitPct}%)
+              <InfoTooltip title="Déficit calórico">
+                {findTerm("Déficit calórico")!.full}
+              </InfoTooltip>
             </span>
             <input
               type="range"
@@ -115,6 +120,7 @@ function Stat({
   value: string;
   accent?: "kcal" | "protein" | "carbs";
 }) {
+  const term = findTerm(label);
   return (
     <div
       className="relative overflow-hidden rounded-2xl px-3.5 py-3"
@@ -124,8 +130,9 @@ function Stat({
           : "var(--surface-muted)",
       }}
     >
-      <div className="text-xs" style={{ color: "var(--text-secondary)" }}>
+      <div className="flex items-center gap-1 text-xs" style={{ color: "var(--text-secondary)" }}>
         {label}
+        {term && <InfoTooltip title={term.term}>{term.full}</InfoTooltip>}
       </div>
       <div className="font-semibold text-[15px] mt-0.5">{value}</div>
     </div>
