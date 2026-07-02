@@ -1,9 +1,11 @@
 "use client";
 
 import { DayPlan, DayLog, ExtraEntry, Macros, MomLunchLog } from "@/lib/types";
+import { scaleMacros } from "@/lib/nutrition";
 import RecipeCard from "./RecipeCard";
 import MomLunchLogger from "./MomLunchLogger";
 import SnackLogger from "./SnackLogger";
+import PortionAdjuster from "./PortionAdjuster";
 
 type Props = {
   day: DayPlan;
@@ -14,6 +16,7 @@ type Props = {
   onClearMomLunch: () => void;
   onAddExtra: (entry: ExtraEntry) => void;
   onRemoveExtra: (id: string) => void;
+  onLunchPortionChange: (portion: number) => void;
 };
 
 export default function DayCard({
@@ -25,6 +28,7 @@ export default function DayCard({
   onClearMomLunch,
   onAddExtra,
   onRemoveExtra,
+  onLunchPortionChange,
 }: Props) {
   const consumedSoFar: Macros = { kcal: 0, protein: 0, carbs: 0, fat: 0 };
   if (log.breakfastEaten) {
@@ -35,7 +39,9 @@ export default function DayCard({
   }
   if (log.lunchEaten) {
     const lunchMacros =
-      day.lunch.type === "recipe" ? day.lunch.recipe.macros : log.momLunch?.macros;
+      day.lunch.type === "recipe"
+        ? scaleMacros(day.lunch.recipe.macros, log.lunchPortion)
+        : log.momLunch?.macros;
     if (lunchMacros) {
       consumedSoFar.kcal += lunchMacros.kcal;
       consumedSoFar.protein += lunchMacros.protein;
@@ -89,11 +95,18 @@ export default function DayCard({
           Almuerzo
         </p>
         {day.lunch.type === "recipe" ? (
-          <RecipeCard
-            recipe={day.lunch.recipe}
-            eaten={log.lunchEaten}
-            onToggle={() => onToggleMeal("lunchEaten")}
-          />
+          <div>
+            <RecipeCard
+              recipe={day.lunch.recipe}
+              eaten={log.lunchEaten}
+              onToggle={() => onToggleMeal("lunchEaten")}
+            />
+            <PortionAdjuster
+              baseMacros={day.lunch.recipe.macros}
+              portion={log.lunchPortion}
+              onChange={onLunchPortionChange}
+            />
+          </div>
         ) : (
           <div className="space-y-2">
             <MomLunchLogger

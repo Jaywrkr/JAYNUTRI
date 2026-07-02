@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { DAY_ORDER, WEEK_PLAN } from "@/lib/mealPlan";
-import { calcTargets, sumMacros } from "@/lib/nutrition";
+import { calcTargets, scaleMacros, sumMacros } from "@/lib/nutrition";
 import { buildWeeklyInsight } from "@/lib/insights";
 import { computeStreak, toISODate } from "@/lib/streak";
 import { DayKey, ExtraEntry, Macros, MomLunchLog } from "@/lib/types";
@@ -119,8 +119,11 @@ export default function Dashboard() {
       const all: Macros[] = [];
       if (log.breakfastEaten) all.push(plan.breakfast.macros);
       if (log.lunchEaten) {
-        if (plan.lunch.type === "recipe") all.push(plan.lunch.recipe.macros);
-        else if (log.momLunch) all.push(log.momLunch.macros);
+        if (plan.lunch.type === "recipe") {
+          all.push(scaleMacros(plan.lunch.recipe.macros, log.lunchPortion));
+        } else if (log.momLunch) {
+          all.push(log.momLunch.macros);
+        }
       }
       if (log.dinnerEaten) all.push(plan.dinner.macros);
       all.push(...log.extras.map((e) => e.macros));
@@ -194,6 +197,10 @@ export default function Dashboard() {
     }));
   };
 
+  const setLunchPortion = (day: DayKey, portion: number) => {
+    setLogs((prev) => ({ ...prev, [day]: { ...prev[day], lunchPortion: portion } }));
+  };
+
   const currentDayPlan = WEEK_PLAN.find((d) => d.day === activeDay)!;
 
   return (
@@ -256,6 +263,7 @@ export default function Dashboard() {
                 onClearMomLunch={() => clearMomLunch(activeDay)}
                 onAddExtra={(entry) => addExtra(activeDay, entry)}
                 onRemoveExtra={(id) => removeExtra(activeDay, id)}
+                onLunchPortionChange={(portion) => setLunchPortion(activeDay, portion)}
               />
             </motion.div>
           </AnimatePresence>

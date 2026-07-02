@@ -15,7 +15,7 @@ const KEYS = {
 export type WeekLogs = Record<DayKey, DayLog>;
 
 function emptyDayLog(): DayLog {
-  return { breakfastEaten: false, lunchEaten: false, dinnerEaten: false, extras: [] };
+  return { breakfastEaten: false, lunchEaten: false, dinnerEaten: false, extras: [], lunchPortion: 1 };
 }
 
 export function emptyLogs(): WeekLogs {
@@ -38,7 +38,12 @@ export function loadLogs(): WeekLogs {
     const stored = JSON.parse(raw) as Partial<WeekLogs>;
     const merged = emptyLogs();
     for (const day of Object.keys(merged) as DayKey[]) {
-      merged[day] = { ...merged[day], ...stored[day], extras: stored[day]?.extras ?? [] };
+      merged[day] = {
+        ...merged[day],
+        ...stored[day],
+        extras: stored[day]?.extras ?? [],
+        lunchPortion: stored[day]?.lunchPortion ?? 1,
+      };
     }
     return merged;
   } catch {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { MomLunchLog, MomLunchPortion } from "@/lib/types";
+import { Macros, MomLunchLog, MomLunchPortion } from "@/lib/types";
 import { MOM_LUNCH_ESTIMATES } from "@/lib/nutrition";
 
 type Props = {
@@ -10,7 +10,7 @@ type Props = {
   onClear: () => void;
 };
 
-const PORTIONS: { key: MomLunchPortion; label: string; hint: string }[] = [
+const PORTIONS: { key: Exclude<MomLunchPortion, "personalizado">; label: string; hint: string }[] = [
   { key: "liviano", label: "Liviano", hint: "sopa + poco seco" },
   { key: "normal", label: "Normal", hint: "plato tradicional" },
   { key: "abundante", label: "Abundante", hint: "plato grande / repetido" },
@@ -22,7 +22,18 @@ const AMBER_BORDER = "color-mix(in oklab, var(--macro-fat) 35%, transparent)";
 export default function MomLunchLogger({ log, onSave, onClear }: Props) {
   const [description, setDescription] = useState(log?.description ?? "");
   const [portion, setPortion] = useState<MomLunchPortion>(log?.portion ?? "normal");
+  const [macros, setMacros] = useState<Macros>(log?.macros ?? MOM_LUNCH_ESTIMATES.normal);
   const [editing, setEditing] = useState(!log);
+
+  const applyPreset = (key: Exclude<MomLunchPortion, "personalizado">) => {
+    setPortion(key);
+    setMacros(MOM_LUNCH_ESTIMATES[key]);
+  };
+
+  const editMacro = (field: keyof Macros, value: number) => {
+    setMacros((m) => ({ ...m, [field]: Math.max(0, value) }));
+    setPortion("personalizado");
+  };
 
   if (log && !editing) {
     return (
@@ -37,8 +48,9 @@ export default function MomLunchLogger({ log, onSave, onClear }: Props) {
             </p>
             <p className="text-sm mt-0.5">{log.description || "(sin descripción)"}</p>
             <p className="text-xs mt-1" style={{ color: "var(--text-secondary)" }}>
-              Estimado ({log.portion}): {log.macros.kcal} kcal · P{log.macros.protein}g · C
-              {log.macros.carbs}g · G{log.macros.fat}g
+              {log.portion === "personalizado" ? "Personalizado" : `Estimado (${log.portion})`}:{" "}
+              {log.macros.kcal} kcal · P{log.macros.protein}g · C{log.macros.carbs}g · G
+              {log.macros.fat}g
             </p>
           </div>
           <div className="flex flex-col gap-1 shrink-0 items-end">
@@ -78,7 +90,7 @@ export default function MomLunchLogger({ log, onSave, onClear }: Props) {
         {PORTIONS.map((p) => (
           <button
             key={p.key}
-            onClick={() => setPortion(p.key)}
+            onClick={() => applyPreset(p.key)}
             className="rounded-full px-3 py-1.5 text-xs transition-all"
             style={
               portion === p.key
@@ -90,14 +102,69 @@ export default function MomLunchLogger({ log, onSave, onClear }: Props) {
           </button>
         ))}
       </div>
-      <div className="flex items-center justify-between gap-2 flex-wrap">
-        <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
-          Estimado: {MOM_LUNCH_ESTIMATES[portion].kcal} kcal · P
-          {MOM_LUNCH_ESTIMATES[portion].protein}g
-        </p>
+
+      <p className="text-xs mb-1.5" style={{ color: "var(--text-secondary)" }}>
+        Ajusta las calorías y macros a mano si sabes que comiste más o menos:
+      </p>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
+        <label className="flex flex-col gap-1">
+          <span className="text-[11px]" style={{ color: "var(--text-muted)" }}>
+            Calorías
+          </span>
+          <input
+            type="number"
+            min={0}
+            value={macros.kcal}
+            onChange={(e) => editMacro("kcal", Number(e.target.value))}
+            className="rounded-lg border px-2 py-1.5 text-sm bg-transparent"
+            style={{ borderColor: "var(--border-hairline)" }}
+          />
+        </label>
+        <label className="flex flex-col gap-1">
+          <span className="text-[11px]" style={{ color: "var(--text-muted)" }}>
+            Proteína (g)
+          </span>
+          <input
+            type="number"
+            min={0}
+            value={macros.protein}
+            onChange={(e) => editMacro("protein", Number(e.target.value))}
+            className="rounded-lg border px-2 py-1.5 text-sm bg-transparent"
+            style={{ borderColor: "var(--border-hairline)" }}
+          />
+        </label>
+        <label className="flex flex-col gap-1">
+          <span className="text-[11px]" style={{ color: "var(--text-muted)" }}>
+            Carbs (g)
+          </span>
+          <input
+            type="number"
+            min={0}
+            value={macros.carbs}
+            onChange={(e) => editMacro("carbs", Number(e.target.value))}
+            className="rounded-lg border px-2 py-1.5 text-sm bg-transparent"
+            style={{ borderColor: "var(--border-hairline)" }}
+          />
+        </label>
+        <label className="flex flex-col gap-1">
+          <span className="text-[11px]" style={{ color: "var(--text-muted)" }}>
+            Grasa (g)
+          </span>
+          <input
+            type="number"
+            min={0}
+            value={macros.fat}
+            onChange={(e) => editMacro("fat", Number(e.target.value))}
+            className="rounded-lg border px-2 py-1.5 text-sm bg-transparent"
+            style={{ borderColor: "var(--border-hairline)" }}
+          />
+        </label>
+      </div>
+
+      <div className="flex items-center justify-end">
         <button
           onClick={() => {
-            onSave({ description, portion, macros: MOM_LUNCH_ESTIMATES[portion] });
+            onSave({ description, portion, macros });
             setEditing(false);
           }}
           className="rounded-full text-white text-xs font-medium px-3.5 py-1.5"

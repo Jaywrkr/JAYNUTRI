@@ -56,7 +56,7 @@ export type DayPlan = {
   lucaJoins: boolean; // martes y viernes
 };
 
-export type MomLunchPortion = "liviano" | "normal" | "abundante";
+export type MomLunchPortion = "liviano" | "normal" | "abundante" | "personalizado";
 
 export type MomLunchLog = {
   description: string;
@@ -77,6 +77,7 @@ export type DayLog = {
   dinnerEaten: boolean;
   momLunch?: MomLunchLog;
   extras: ExtraEntry[];
+  lunchPortion: number; // multiplicador sobre la receta del almuerzo (sábado/domingo)
 };
 
 export type Profile = {
