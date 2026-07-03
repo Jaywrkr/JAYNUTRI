@@ -54,18 +54,18 @@ export default function HeroStat({ label, consumed, target, dayLabel }: Props) {
   const dot = pointOnArc(Math.min(1, pct));
 
   return (
-    <div className="brand-card rounded-[32px] relative overflow-hidden min-h-[280px] flex flex-col justify-between">
+    <div className="glass-card rounded-[28px] relative overflow-hidden min-h-[280px] flex flex-col justify-between">
       <div className="flex items-center justify-between pt-6 px-6">
         <p
           className="text-[11px] font-medium uppercase tracking-[0.15em]"
-          style={{ color: "rgba(255,255,255,0.45)" }}
+          style={{ color: "var(--text-muted)" }}
         >
           {label} · {dayLabel}
         </p>
         {done && (
           <span
-            className="text-[11px] font-semibold uppercase tracking-wide rounded-full px-2.5 py-1"
-            style={{ background: "var(--brand-accent)", color: "white" }}
+            className="text-[11px] font-semibold uppercase tracking-wide rounded-full px-2.5 py-1 text-white"
+            style={{ background: "var(--brand-gradient)" }}
           >
             ✓ cumplido
           </span>
@@ -78,14 +78,21 @@ export default function HeroStat({ label, consumed, target, dayLabel }: Props) {
         preserveAspectRatio="xMidYMax meet"
         aria-hidden
       >
+        <defs>
+          <linearGradient id="heroDotGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="var(--macro-kcal)" />
+            <stop offset="55%" stopColor="var(--macro-protein)" />
+            <stop offset="100%" stopColor="var(--macro-carbs)" />
+          </linearGradient>
+        </defs>
         {ARCS.map((r, i) => (
           <path
             key={r}
             d={`M ${CENTER - r} ${BASELINE} A ${r} ${r * 0.72} 0 0 1 ${CENTER + r} ${BASELINE}`}
             fill="none"
-            stroke={r === PATH_R ? "var(--brand-accent)" : "rgba(255,255,255,0.9)"}
+            stroke={r === PATH_R ? "var(--macro-protein)" : "var(--text-muted)"}
             strokeWidth={r === PATH_R ? 1.5 : 1}
-            opacity={r === PATH_R ? 0.5 : 0.08 + i * 0.05}
+            opacity={r === PATH_R ? 0.55 : 0.1 + i * 0.05}
           />
         ))}
         <line
@@ -93,12 +100,12 @@ export default function HeroStat({ label, consumed, target, dayLabel }: Props) {
           y1={BASELINE}
           x2={WIDTH - 16}
           y2={BASELINE}
-          stroke="rgba(255,255,255,0.35)"
+          stroke="var(--border-hairline)"
           strokeWidth="1"
         />
         <motion.circle
           r="9"
-          fill="var(--brand-accent)"
+          fill="url(#heroDotGradient)"
           initial={false}
           animate={{ cx: dot.x, cy: dot.y }}
           transition={{ type: "spring", stiffness: 90, damping: 16 }}
@@ -106,10 +113,10 @@ export default function HeroStat({ label, consumed, target, dayLabel }: Props) {
       </svg>
 
       <div className="px-6 pb-6">
-        <p className="text-4xl sm:text-5xl font-bold tracking-tight leading-none text-white tabular-nums">
+        <p className="text-4xl sm:text-5xl font-bold tracking-tight leading-none gradient-text tabular-nums">
           {displayValue}
         </p>
-        <p className="text-sm mt-2" style={{ color: "rgba(255,255,255,0.6)" }}>
+        <p className="text-sm mt-2" style={{ color: "var(--text-secondary)" }}>
           {done
             ? `kcal de tu objetivo obligatorio de ${target.kcal} hoy`
             : `kcal que faltan para completar tu objetivo de ${target.kcal} hoy`}

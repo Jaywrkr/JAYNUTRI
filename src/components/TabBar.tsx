@@ -17,8 +17,7 @@ type Props = {
 export default function TabBar({ active, onChange }: Props) {
   return (
     <nav
-      className="no-print fixed bottom-4 inset-x-4 sm:inset-x-auto sm:left-1/2 sm:-translate-x-1/2 z-40 rounded-full flex items-center justify-around gap-1 py-2 px-2 sm:px-3"
-      style={{ background: "var(--brand-black)" }}
+      className="no-print glass-card fixed bottom-4 inset-x-4 sm:inset-x-auto sm:left-1/2 sm:-translate-x-1/2 z-40 rounded-full flex items-center justify-around gap-1 py-2 px-2 sm:px-3 backdrop-blur-xl"
       aria-label="Navegación principal"
     >
       {ITEMS.map((item) => {
@@ -29,14 +28,14 @@ export default function TabBar({ active, onChange }: Props) {
             onClick={() => onChange(item.id)}
             aria-current={isActive ? "true" : undefined}
             className="flex flex-col items-center justify-center gap-0.5 h-12 w-14 sm:w-20 rounded-full text-base transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2"
-            style={{ background: isActive ? "var(--brand-accent)" : "transparent" }}
+            style={isActive ? { background: "var(--brand-gradient)" } : { background: "transparent" }}
           >
             <span className="leading-none" aria-hidden>
               {item.icon}
             </span>
             <span
               className="text-[9px] font-medium leading-none"
-              style={{ color: isActive ? "white" : "rgba(255,255,255,0.55)" }}
+              style={{ color: isActive ? "white" : "var(--text-secondary)" }}
             >
               {item.label}
             </span>

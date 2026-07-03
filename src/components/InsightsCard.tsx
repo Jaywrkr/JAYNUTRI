@@ -70,16 +70,21 @@ export default function InsightsCard({ weekData, weeklyConsumed, weeklyTarget, t
   const todayValue = todayIdx >= 0 ? weekData[todayIdx][metric] : 0;
 
   return (
-    <div className="green-card rounded-[32px] overflow-hidden">
+    <div className="glass-card rounded-[28px] overflow-hidden">
       <div className="p-5 sm:p-6 pb-3">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-semibold">Progreso</h2>
+          <div className="flex items-center gap-2">
+            <span className="grid place-items-center h-8 w-8 rounded-xl text-base bg-[color-mix(in_oklab,var(--macro-protein)_18%,transparent)]">
+              📊
+            </span>
+            <h2 className="text-lg font-semibold">Progreso</h2>
+          </div>
           <div className="flex items-center gap-2">
             <button
               onClick={() => setSpin((s) => s + 1)}
               aria-label="Actualizar"
               className="grid place-items-center h-8 w-8 rounded-full"
-              style={{ background: "rgba(13,13,13,0.12)" }}
+              style={{ background: "var(--surface-muted)" }}
             >
               <motion.span
                 key={spin}
@@ -95,13 +100,13 @@ export default function InsightsCard({ weekData, weeklyConsumed, weeklyTarget, t
               onClick={() => setMetric((m) => (m === "kcal" ? "protein" : "kcal"))}
               aria-label="Cambiar métrica del gráfico"
               className="grid place-items-center h-8 w-8 rounded-full text-sm"
-              style={{ background: "rgba(13,13,13,0.12)" }}
+              style={{ background: "var(--surface-muted)" }}
             >
               ⚙
             </button>
           </div>
         </div>
-        <p className="text-xs mt-0.5" style={{ color: "rgba(13,13,13,0.6)" }}>
+        <p className="text-xs mt-0.5" style={{ color: "var(--text-secondary)" }}>
           {metric === "kcal" ? "Calorías por día" : "Proteína por día (g)"}
         </p>
 
@@ -109,8 +114,13 @@ export default function InsightsCard({ weekData, weeklyConsumed, weeklyTarget, t
           <svg viewBox={`0 0 ${CHART_W} ${CHART_H}`} className="w-full h-[130px]" preserveAspectRatio="none">
             <defs>
               <linearGradient id="areaFade" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="rgba(13,13,13,0.22)" />
-                <stop offset="100%" stopColor="rgba(13,13,13,0)" />
+                <stop offset="0%" stopColor="color-mix(in oklab, var(--macro-protein) 35%, transparent)" />
+                <stop offset="100%" stopColor="color-mix(in oklab, var(--macro-protein) 0%, transparent)" />
+              </linearGradient>
+              <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="var(--macro-kcal)" />
+                <stop offset="50%" stopColor="var(--macro-protein)" />
+                <stop offset="100%" stopColor="var(--macro-carbs)" />
               </linearGradient>
             </defs>
             <motion.path
@@ -123,8 +133,8 @@ export default function InsightsCard({ weekData, weeklyConsumed, weeklyTarget, t
             <motion.path
               d={linePath}
               fill="none"
-              stroke="var(--brand-black)"
-              strokeWidth="2"
+              stroke="url(#lineGradient)"
+              strokeWidth="2.5"
               strokeLinecap="round"
               initial={{ pathLength: 0 }}
               animate={{ pathLength: 1 }}
@@ -137,24 +147,23 @@ export default function InsightsCard({ weekData, weeklyConsumed, weeklyTarget, t
                   y1={todayPoint.y}
                   x2={todayPoint.x}
                   y2={CHART_H}
-                  stroke="var(--brand-black)"
+                  stroke="var(--macro-protein)"
                   strokeWidth="1"
                   strokeDasharray="3 3"
                   opacity={0.5}
                 />
-                <circle cx={todayPoint.x} cy={todayPoint.y} r="5" fill="var(--brand-black)" />
-                <circle cx={todayPoint.x} cy={todayPoint.y} r="8" fill="none" stroke="var(--brand-black)" strokeWidth="1" opacity={0.4} />
+                <circle cx={todayPoint.x} cy={todayPoint.y} r="5" fill="var(--macro-protein)" />
+                <circle cx={todayPoint.x} cy={todayPoint.y} r="8" fill="none" stroke="var(--macro-protein)" strokeWidth="1" opacity={0.4} />
               </>
             )}
           </svg>
           {todayPoint && (
             <div
-              className="absolute text-[10px] font-medium rounded-full px-2 py-0.5 -translate-x-1/2"
+              className="absolute text-[10px] font-medium rounded-full px-2 py-0.5 -translate-x-1/2 text-white"
               style={{
                 left: `${(todayPoint.x / CHART_W) * 100}%`,
                 top: 0,
-                background: "var(--brand-black)",
-                color: "white",
+                background: "var(--brand-gradient)",
               }}
             >
               hoy · {Math.round(todayValue)}
@@ -166,7 +175,7 @@ export default function InsightsCard({ weekData, weeklyConsumed, weeklyTarget, t
               <span
                 key={i}
                 className="text-[10px] flex-1 text-center"
-                style={{ color: d.isToday ? "var(--brand-black)" : "rgba(13,13,13,0.5)", fontWeight: d.isToday ? 700 : 400 }}
+                style={{ color: d.isToday ? "var(--foreground)" : "var(--text-muted)", fontWeight: d.isToday ? 700 : 400 }}
               >
                 {d.label}
               </span>
@@ -175,7 +184,7 @@ export default function InsightsCard({ weekData, weeklyConsumed, weeklyTarget, t
         </div>
       </div>
 
-      <div className="rounded-t-[28px] px-5 sm:px-6 pt-5 pb-2" style={{ background: "var(--surface)" }}>
+      <div className="rounded-t-[24px] px-5 sm:px-6 pt-5 pb-2" style={{ background: "var(--surface-muted)" }}>
         <div className="grid grid-cols-3 gap-2 pb-4">
           <Stat value={weeklyConsumed.kcal} label="kcal semana" />
           <Stat value={weeklyTarget.kcal} label="objetivo" />
